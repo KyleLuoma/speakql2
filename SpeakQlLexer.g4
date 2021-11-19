@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-lexer grammar MySqlLexer;
+lexer grammar SpeakQlLexer;
 
 channels { MYSQLCOMMENT, ERRORCHANNEL }
 
@@ -39,6 +39,14 @@ LINE_COMMENT:                        (
 
 
 // Keywords
+
+// SpeakQL 2 Keywords
+RETRIEVE:                           'RETRIEVE';
+SHOW_ME:                            'SHOW ME';
+DISPLAY:                            'DISPLAY';
+PRESENT:                            'PRESENT';
+FIND:                               'FIND';
+
 // Common Keywords
 
 ADD:                                 'ADD';
