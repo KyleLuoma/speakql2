@@ -973,18 +973,24 @@ indexHintType
     ;
 
 joinPart
-    : (INNER | CROSS)? JOIN tableSourceItem
+    : (INNER | CROSS)? joinKeyword tableSourceItem
       (
         ON expression
         | USING '(' uidList ')'
       )?                                                            #innerJoin
     | STRAIGHT_JOIN tableSourceItem (ON expression)?                #straightJoin
-    | (LEFT | RIGHT) OUTER? JOIN tableSourceItem
+    | (LEFT | RIGHT) OUTER? joinKeyword tableSourceItem
         (
           ON expression
           | USING '(' uidList ')'
         )                                                           #outerJoin
-    | NATURAL ((LEFT | RIGHT) OUTER?)? JOIN tableSourceItem         #naturalJoin
+    | NATURAL ((LEFT | RIGHT) OUTER?)? joinKeyword tableSourceItem         #naturalJoin
+    ;
+
+
+
+joinKeyword
+    : JOIN | JOIN_TABLE | BY_JOINING | BY_JOINING_TABLE | JOINED_WITH | JOINED_WITH_TABLE
     ;
 
 //    Select Statement's Details
@@ -1000,14 +1006,21 @@ queryExpressionNointo
     ;
 
 querySpecification
-    : selectExpression selectSpec* selectElements selectIntoExpression?
-      fromClause? groupByClause? havingClause? windowClause? orderByClause? limitClause?
-    | SELECT selectSpec* selectElements
-    fromClause? groupByClause? havingClause? windowClause? orderByClause? limitClause? selectIntoExpression?
+    : selectExpression tableExpression selectModifierExpression
+    | tableExpression selectExpression selectModifierExpression
+    ;
+
+selectModifierExpression
+    : groupByClause? havingClause? windowClause? orderByClause? limitClause?
+    | groupByClause? havingClause? windowClause? orderByClause? limitClause? selectIntoExpression?
     ;
 
 selectExpression
-    : selectClause
+    : selectClause selectSpec* selectElements selectIntoExpression? | selectClause selectSpec* selectElements
+    ;
+
+tableExpression
+    : fromClause?
     ;
 
 selectClause
@@ -1043,7 +1056,11 @@ selectSpec
     ;
 
 selectElements
-    : (star='*' | selectElement ) (',' selectElement)*
+    : (star='*' | selectElement ) (selectElementDelimiter selectElement)*
+    ;
+
+selectElementDelimiter
+    : ',' | AND
     ;
 
 selectElement
@@ -1081,8 +1098,12 @@ selectLinesInto
     ;
 
 fromClause
-    : (FROM tableSources)?
+    : (fromKeyword tableSources)?
       (WHERE whereExpr=expression)?
+    ;
+
+fromKeyword
+    : FROM | IN_TABLE | FROM_TABLE
     ;
 
 groupByClause

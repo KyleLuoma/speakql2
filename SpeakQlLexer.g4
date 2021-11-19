@@ -47,6 +47,15 @@ DISPLAY:                            'DISPLAY';
 PRESENT:                            'PRESENT';
 FIND:                               'FIND';
 
+IN_TABLE:                           'IN TABLE';
+FROM_TABLE:                         'FROM TABLE';
+
+JOIN_TABLE:                         'JOIN TABLE';
+BY_JOINING:                         'BY JOINING';
+BY_JOINING_TABLE:                   'BY JOINING TABLE';
+JOINED_WITH:                        'JOINED WITH';
+JOINED_WITH_TABLE:                  'JOINED WITH TABLE';
+
 // Common Keywords
 
 ADD:                                 'ADD';
