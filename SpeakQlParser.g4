@@ -1007,7 +1007,11 @@ queryExpressionNointo
 
 querySpecification
     : selectExpression tableExpression selectModifierExpression
+    | selectExpression selectModifierExpression tableExpression
     | tableExpression selectExpression selectModifierExpression
+    | tableExpression selectModifierExpression selectExpression
+    | selectModifierExpression tableExpression selectExpression
+    | selectModifierExpression selectExpression tableExpression
     ;
 
 selectModifierExpression
