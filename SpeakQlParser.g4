@@ -164,7 +164,7 @@ createLogfileGroup
 createProcedure
     : CREATE ownerStatement?
     PROCEDURE fullId
-      '(' procedureParameter? (',' procedureParameter)* ')'
+      leftParen procedureParameter? (',' procedureParameter)* rightParen
       routineOption*
     routineBody
     ;
@@ -172,7 +172,7 @@ createProcedure
 createFunction
     : CREATE ownerStatement?
     FUNCTION fullId
-      '(' functionParameter? (',' functionParameter)* ')'
+      leftParen functionParameter? (',' functionParameter)* rightParen
       RETURNS dataType
       routineOption*
     (routineBody | returnStatement)
@@ -181,7 +181,7 @@ createFunction
 createServer
     : CREATE SERVER uid
     FOREIGN DATA WRAPPER wrapperName=(MYSQL | STRING_LITERAL)
-    OPTIONS '(' serverOption (',' serverOption)* ')'
+    OPTIONS leftParen serverOption (',' serverOption)* rightParen
     ;
 
 createTable
@@ -189,7 +189,7 @@ createTable
        tableName
        (
          LIKE tableName
-         | '(' LIKE parenthesisTable=tableName ')'
+         | leftParen LIKE parenthesisTable=tableName rightParen
        )                                                            #copyCreateTable
     | CREATE TEMPORARY? TABLE ifNotExists?
        tableName createDefinitions?
@@ -240,7 +240,7 @@ createView
       )?
       ownerStatement?
       (SQL SECURITY secContext=(DEFINER | INVOKER))?
-      VIEW fullId ('(' uidList ')')? AS selectStatement
+      VIEW fullId (leftParen uidList rightParen)? AS selectStatement
       (WITH checkOption=(CASCADED | LOCAL)? CHECK OPTION)?
     ;
 
@@ -252,7 +252,7 @@ createDatabaseOption
     ;
 
 ownerStatement
-    : DEFINER '=' (userName | CURRENT_USER ( '(' ')')?)
+    : DEFINER '=' (userName | CURRENT_USER ( leftParen rightParen)?)
     ;
 
 scheduleExpression
@@ -334,7 +334,7 @@ serverOption
     ;
 
 createDefinitions
-    : '(' createDefinition (',' createDefinition)* ')'
+    : leftParen createDefinition (',' createDefinition)* rightParen
     ;
 
 createDefinition
@@ -360,10 +360,10 @@ columnConstraint
     | STORAGE storageval=(DISK | MEMORY | DEFAULT)                  #storageColumnConstraint
     | referenceDefinition                                           #referenceColumnConstraint
     | COLLATE collationName                                         #collateColumnConstraint
-    | (GENERATED ALWAYS)? AS '(' expression ')' (VIRTUAL | STORED)? #generatedColumnConstraint
+    | (GENERATED ALWAYS)? AS leftParen expression rightParen (VIRTUAL | STORED)? #generatedColumnConstraint
     | SERIAL DEFAULT VALUE                                          #serialDefaultColumnConstraint
     | (CONSTRAINT name=uid?)?
-      CHECK '(' expression ')'                                      #checkColumnConstraint
+      CHECK leftParen expression rightParen                                      #checkColumnConstraint
     ;
 
 tableConstraint
@@ -377,7 +377,7 @@ tableConstraint
       FOREIGN KEY index=uid? indexColumnNames
       referenceDefinition                                           #foreignKeyTableConstraint
     | (CONSTRAINT name=uid?)?
-      CHECK '(' expression ')'                                      #checkTableConstraint
+      CHECK leftParen expression rightParen                                      #checkTableConstraint
     ;
 
 referenceDefinition
@@ -440,7 +440,7 @@ tableOption
     | TABLESPACE uid tablespaceStorage?                             #tableOptionTablespace
     | TABLE_TYPE '=' tableType                                      #tableOptionTableType
     | tablespaceStorage                                             #tableOptionTablespace
-    | UNION '='? '(' tables ')'                                     #tableOptionUnion
+    | UNION '='? leftParen tables rightParen                                     #tableOptionUnion
     ;
 
 tableType
@@ -458,47 +458,47 @@ partitionDefinitions
         SUBPARTITION BY subpartitionFunctionDefinition
         (SUBPARTITIONS subCount=decimalLiteral)?
       )?
-    ('(' partitionDefinition (',' partitionDefinition)* ')')?
+    (leftParen partitionDefinition (',' partitionDefinition)* rightParen)?
     ;
 
 partitionFunctionDefinition
-    : LINEAR? HASH '(' expression ')'                               #partitionFunctionHash
+    : LINEAR? HASH leftParen expression rightParen                               #partitionFunctionHash
     | LINEAR? KEY (ALGORITHM '=' algType=('1' | '2'))?
-      '(' uidList ')'                                               #partitionFunctionKey
-    | RANGE ( '(' expression ')' | COLUMNS '(' uidList ')' )        #partitionFunctionRange
-    | LIST ( '(' expression ')' | COLUMNS '(' uidList ')' )         #partitionFunctionList
+      leftParen uidList rightParen                                               #partitionFunctionKey
+    | RANGE ( leftParen expression rightParen | COLUMNS leftParen uidList rightParen )        #partitionFunctionRange
+    | LIST ( leftParen expression rightParen | COLUMNS leftParen uidList rightParen )         #partitionFunctionList
     ;
 
 subpartitionFunctionDefinition
-    : LINEAR? HASH '(' expression ')'                               #subPartitionFunctionHash
+    : LINEAR? HASH leftParen expression rightParen                               #subPartitionFunctionHash
     | LINEAR? KEY (ALGORITHM '=' algType=('1' | '2'))?
-      '(' uidList ')'                                               #subPartitionFunctionKey
+      leftParen uidList rightParen                                               #subPartitionFunctionKey
     ;
 
 partitionDefinition
     : PARTITION uid VALUES LESS THAN
-      '('
+      leftParen
           partitionDefinerAtom (',' partitionDefinerAtom)*
-      ')'
+      rightParen
       partitionOption*
-      ( '(' subpartitionDefinition (',' subpartitionDefinition)* ')' )?       #partitionComparison
+      ( leftParen subpartitionDefinition (',' subpartitionDefinition)* rightParen )?       #partitionComparison
     | PARTITION uid VALUES LESS THAN
       partitionDefinerAtom partitionOption*
-      ( '(' subpartitionDefinition (',' subpartitionDefinition)* ')' )?       #partitionComparison
+      ( leftParen subpartitionDefinition (',' subpartitionDefinition)* rightParen )?       #partitionComparison
     | PARTITION uid VALUES IN
-      '('
+      leftParen
           partitionDefinerAtom (',' partitionDefinerAtom)*
-      ')'
+      rightParen
       partitionOption*
-      ( '(' subpartitionDefinition (',' subpartitionDefinition)* ')' )?       #partitionListAtom
+      ( leftParen subpartitionDefinition (',' subpartitionDefinition)* rightParen )?       #partitionListAtom
     | PARTITION uid VALUES IN
-      '('
+      leftParen
           partitionDefinerVector (',' partitionDefinerVector)*
-      ')'
+      rightParen
       partitionOption*
-      ( '(' subpartitionDefinition (',' subpartitionDefinition)* ')' )?       #partitionListVector
+      ( leftParen subpartitionDefinition (',' subpartitionDefinition)* rightParen )?       #partitionListVector
     | PARTITION uid partitionOption*
-      ( '(' subpartitionDefinition (',' subpartitionDefinition)* ')' )?       #partitionSimple
+      ( leftParen subpartitionDefinition (',' subpartitionDefinition)* rightParen )?       #partitionSimple
     ;
 
 partitionDefinerAtom
@@ -506,7 +506,7 @@ partitionDefinerAtom
     ;
 
 partitionDefinerVector
-    : '(' partitionDefinerAtom (',' partitionDefinerAtom)+ ')'
+    : leftParen partitionDefinerAtom (',' partitionDefinerAtom)+ rightParen
     ;
 
 subpartitionDefinition
@@ -564,7 +564,7 @@ alterProcedure
 
 alterServer
     : ALTER SERVER uid OPTIONS
-      '(' serverOption (',' serverOption)* ')'
+      leftParen serverOption (',' serverOption)* rightParen
     ;
 
 alterTable
@@ -589,7 +589,7 @@ alterView
       )?
       ownerStatement?
       (SQL SECURITY secContext=(DEFINER | INVOKER))?
-      VIEW fullId ('(' uidList ')')? AS selectStatement
+      VIEW fullId (leftParen uidList rightParen)? AS selectStatement
       (WITH checkOpt=(CASCADED | LOCAL)? CHECK OPTION)?
     ;
 
@@ -599,9 +599,9 @@ alterSpecification
     : tableOption (','? tableOption)*                               #alterByTableOption
     | ADD COLUMN? uid columnDefinition (FIRST | AFTER uid)?         #alterByAddColumn
     | ADD COLUMN?
-        '('
+        leftParen
           uid columnDefinition ( ',' uid columnDefinition)*
-        ')'                                                         #alterByAddColumns
+        rightParen                                                         #alterByAddColumns
     | ADD indexFormat=(INDEX | KEY) uid? indexType?
       indexColumnNames indexOption*                                 #alterByAddIndex
     | ADD (CONSTRAINT name=uid?)? PRIMARY KEY index=uid?
@@ -614,7 +614,7 @@ alterSpecification
       indexColumnNames indexOption*                                 #alterByAddSpecialIndex
     | ADD (CONSTRAINT name=uid?)? FOREIGN KEY
       indexName=uid? indexColumnNames referenceDefinition           #alterByAddForeignKey
-    | ADD (CONSTRAINT name=uid?)? CHECK '(' expression ')'          #alterByAddCheckTableConstraint
+    | ADD (CONSTRAINT name=uid?)? CHECK leftParen expression rightParen          #alterByAddCheckTableConstraint
     | ALGORITHM '='? algType=(DEFAULT | INPLACE | COPY)             #alterBySetAlgorithm
     | ALTER COLUMN? uid
       (SET DEFAULT defaultValue | DROP DEFAULT)                     #alterByChangeDefault
@@ -645,18 +645,18 @@ alterSpecification
     | FORCE                                                         #alterByForce
     | validationFormat=(WITHOUT | WITH) VALIDATION                  #alterByValidate
     | ADD PARTITION
-        '('
+        leftParen
           partitionDefinition (',' partitionDefinition)*
-        ')'                                                         #alterByAddPartition
+        rightParen                                                         #alterByAddPartition
     | DROP PARTITION uidList                                        #alterByDropPartition
     | DISCARD PARTITION (uidList | ALL) TABLESPACE                  #alterByDiscardPartition
     | IMPORT PARTITION (uidList | ALL) TABLESPACE                   #alterByImportPartition
     | TRUNCATE PARTITION (uidList | ALL)                            #alterByTruncatePartition
     | COALESCE PARTITION decimalLiteral                             #alterByCoalescePartition
     | REORGANIZE PARTITION uidList
-        INTO '('
+        INTO leftParen
           partitionDefinition (',' partitionDefinition)*
-        ')'                                                         #alterByReorganizePartition
+        rightParen                                                         #alterByReorganizePartition
     | EXCHANGE PARTITION uid WITH TABLE tableName
       (validationFormat=(WITH | WITHOUT) VALIDATION)?               #alterByExchangePartition
     | ANALYZE PARTITION (uidList | ALL)                             #alterByAnalyzePartition
@@ -748,7 +748,7 @@ truncateTable
 callStatement
     : CALL fullId
       (
-        '(' (constants | expressions)? ')'
+        leftParen (constants | expressions)? rightParen
       )?
     ;
 
@@ -771,9 +771,9 @@ insertStatement
     : INSERT
       priority=(LOW_PRIORITY | DELAYED | HIGH_PRIORITY)?
       IGNORE? INTO? tableName
-      (PARTITION '(' partitions=uidList? ')' )?
+      (PARTITION leftParen partitions=uidList? rightParen )?
       (
-        ('(' columns=uidList ')')? insertStatementValue
+        (leftParen columns=uidList rightParen)? insertStatementValue
         | SET
             setFirst=updatedElement
             (',' setElements+=updatedElement)*
@@ -791,7 +791,7 @@ loadDataStatement
       LOCAL? INFILE filename=STRING_LITERAL
       violation=(REPLACE | IGNORE)?
       INTO TABLE tableName
-      (PARTITION '(' uidList ')' )?
+      (PARTITION leftParen uidList rightParen )?
       (CHARACTER SET charset=charsetName)?
       (
         fieldsFormat=(FIELDS | COLUMNS)
@@ -804,7 +804,7 @@ loadDataStatement
       (
         IGNORE decimalLiteral linesFormat=(LINES | ROWS)
       )?
-      ( '(' assignmentField (',' assignmentField)* ')' )?
+      ( leftParen assignmentField (',' assignmentField)* rightParen )?
       (SET updatedElement (',' updatedElement)*)?
     ;
 
@@ -817,16 +817,16 @@ loadXmlStatement
       (CHARACTER SET charset=charsetName)?
       (ROWS IDENTIFIED BY '<' tag=STRING_LITERAL '>')?
       ( IGNORE decimalLiteral linesFormat=(LINES | ROWS) )?
-      ( '(' assignmentField (',' assignmentField)* ')' )?
+      ( leftParen assignmentField (',' assignmentField)* rightParen )?
       (SET updatedElement (',' updatedElement)*)?
     ;
 
 replaceStatement
     : REPLACE priority=(LOW_PRIORITY | DELAYED)?
       INTO? tableName
-      (PARTITION '(' partitions=uidList ')' )?
+      (PARTITION leftParen partitions=uidList rightParen )?
       (
-        ('(' columns=uidList ')')? insertStatementValue
+        (leftParen columns=uidList rightParen)? insertStatementValue
         | SET
           setFirst=updatedElement
           (',' setElements+=updatedElement)*
@@ -859,8 +859,8 @@ updateStatement
 insertStatementValue
     : selectStatement
     | insertFormat=(VALUES | VALUE)
-      '(' expressionsWithDefaults? ')'
-        (',' '(' expressionsWithDefaults? ')')*
+      leftParen expressionsWithDefaults? rightParen
+        (',' leftParen expressionsWithDefaults? rightParen)*
     ;
 
 updatedElement
@@ -880,7 +880,7 @@ lockClause
 singleDeleteStatement
     : DELETE priority=LOW_PRIORITY? QUICK? IGNORE?
     FROM tableName
-      (PARTITION '(' uidList ')' )?
+      (PARTITION leftParen uidList rightParen )?
       (WHERE expression)?
       orderByClause? (LIMIT limitClauseAtom)?
     ;
@@ -904,7 +904,7 @@ handlerOpenStatement
 handlerReadIndexStatement
     : HANDLER tableName READ index=uid
       (
-        comparisonOperator '(' constants ')'
+        comparisonOperator leftParen constants rightParen
         | moveOrder=(FIRST | NEXT | PREV | LAST)
       )
       (WHERE expression)? (LIMIT limitClauseAtom)?
@@ -947,25 +947,25 @@ tableSources
 
 tableSource
     : tableSourceItem joinPart*                                     #tableSourceBase
-    | '(' tableSourceItem joinPart* ')'                             #tableSourceNested
+    | leftParen tableSourceItem joinPart* rightParen                             #tableSourceNested
     ;
 
 tableSourceItem
     : tableName
-      (PARTITION '(' uidList ')' )? (AS? alias=uid)?
+      (PARTITION leftParen uidList rightParen )? (AS? alias=uid)?
       (indexHint (',' indexHint)* )?                                #atomTableItem
     | (
       selectStatement
-      | '(' parenthesisSubquery=selectStatement ')'
+      | leftParen parenthesisSubquery=selectStatement rightParen
       )
       AS? alias=uid                                                 #subqueryTableItem
-    | '(' tableSources ')'                                          #tableSourcesItem
+    | leftParen tableSources rightParen                                          #tableSourcesItem
     ;
 
 indexHint
     : indexHintAction=(USE | IGNORE | FORCE)
       keyFormat=(INDEX|KEY) ( FOR indexHintType)?
-      '(' uidList ')'
+      leftParen uidList rightParen
     ;
 
 indexHintType
@@ -976,13 +976,13 @@ joinPart
     : (INNER | CROSS)? joinKeyword tableSourceItem
       (
         ON expression
-        | USING '(' uidList ')'
+        | USING leftParen uidList rightParen
       )?                                                            #innerJoin
     | STRAIGHT_JOIN tableSourceItem (ON expression)?                #straightJoin
     | (LEFT | RIGHT) OUTER? joinKeyword tableSourceItem
         (
           ON expression
-          | USING '(' uidList ')'
+          | USING leftParen uidList rightParen
         )                                                           #outerJoin
     | NATURAL ((LEFT | RIGHT) OUTER?)? joinKeyword tableSourceItem         #naturalJoin
     ;
@@ -996,13 +996,13 @@ joinKeyword
 //    Select Statement's Details
 
 queryExpression
-    : '(' querySpecification ')'
-    | '(' queryExpression ')'
+    : leftParen querySpecification rightParen
+    | leftParen queryExpression rightParen
     ;
 
 queryExpressionNointo
-    : '(' querySpecificationNointo ')'
-    | '(' queryExpressionNointo ')'
+    : leftParen querySpecificationNointo rightParen
+    | leftParen queryExpressionNointo rightParen
     ;
 
 querySpecification
@@ -1121,7 +1121,7 @@ havingClause
     ;
 
 windowClause
-    :  WINDOW windowName AS '(' windowSpec ')' (',' windowName AS '(' windowSpec ')')*
+    :  WINDOW windowName AS leftParen windowSpec rightParen (',' windowName AS leftParen windowSpec rightParen)*
     ;
 
 groupByItem
@@ -1278,7 +1278,7 @@ masterOption
     | decimalMasterOption '=' decimalLiteral                        #masterDecimalOption
     | boolMasterOption '=' boolVal=('0' | '1')                      #masterBoolOption
     | MASTER_HEARTBEAT_PERIOD '=' REAL_LITERAL                      #masterRealOption
-    | IGNORE_SERVER_IDS '=' '(' (uid (',' uid)*)? ')'               #masterUidListOption
+    | IGNORE_SERVER_IDS '=' leftParen (uid (',' uid)*)? rightParen               #masterUidListOption
     ;
 
 stringMasterOption
@@ -1303,19 +1303,19 @@ channelOption
     ;
 
 replicationFilter
-    : REPLICATE_DO_DB '=' '(' uidList ')'                           #doDbReplication
-    | REPLICATE_IGNORE_DB '=' '(' uidList ')'                       #ignoreDbReplication
-    | REPLICATE_DO_TABLE '=' '(' tables ')'                         #doTableReplication
-    | REPLICATE_IGNORE_TABLE '=' '(' tables ')'                     #ignoreTableReplication
-    | REPLICATE_WILD_DO_TABLE '=' '(' simpleStrings ')'             #wildDoTableReplication
+    : REPLICATE_DO_DB '=' leftParen uidList rightParen                           #doDbReplication
+    | REPLICATE_IGNORE_DB '=' leftParen uidList rightParen                       #ignoreDbReplication
+    | REPLICATE_DO_TABLE '=' leftParen tables rightParen                         #doTableReplication
+    | REPLICATE_IGNORE_TABLE '=' leftParen tables rightParen                     #ignoreTableReplication
+    | REPLICATE_WILD_DO_TABLE '=' leftParen simpleStrings rightParen             #wildDoTableReplication
     | REPLICATE_WILD_IGNORE_TABLE
-       '=' '(' simpleStrings ')'                                    #wildIgnoreTableReplication
+       '=' leftParen simpleStrings rightParen                                    #wildIgnoreTableReplication
     | REPLICATE_REWRITE_DB '='
-      '(' tablePair (',' tablePair)* ')'                            #rewriteDbReplication
+      leftParen tablePair (',' tablePair)* rightParen                            #rewriteDbReplication
     ;
 
 tablePair
-    : '(' firstTable=tableName ',' secondTable=tableName ')'
+    : leftParen firstTable=tableName ',' secondTable=tableName rightParen
     ;
 
 threadType
@@ -1640,7 +1640,7 @@ userLockOption
     ;
 
 privelegeClause
-    : privilege ( '(' uidList ')' )?
+    : privilege ( leftParen uidList rightParen )?
     ;
 
 privilege
@@ -1774,7 +1774,7 @@ showStatement
           (offset=decimalLiteral ',')?
           rowCount=decimalLiteral
         )                                                           #showErrors
-    | SHOW COUNT '(' '*' ')' errorFormat=(ERRORS | WARNINGS)        #showCountErrors
+    | SHOW COUNT leftParen '*' rightParen errorFormat=(ERRORS | WARNINGS)        #showCountErrors
     | SHOW showSchemaEntity
         (schemaFormat=(FROM | IN) uid)? showFilter?                 #showSchemaFilter
     | SHOW routine=(FUNCTION | PROCEDURE) CODE fullId               #showRoutine
@@ -1834,7 +1834,7 @@ binlogStatement
 
 cacheIndexStatement
     : CACHE INDEX tableIndexes (',' tableIndexes)*
-      ( PARTITION '(' (uidList | ALL) ')' )?
+      ( PARTITION leftParen (uidList | ALL) rightParen )?
       IN schema=uid
     ;
 
@@ -1866,7 +1866,7 @@ shutdownStatement
 // details
 
 tableIndexes
-    : tableName ( indexFormat=(INDEX | KEY)? '(' uidList ')' )?
+    : tableName ( indexFormat=(INDEX | KEY)? leftParen uidList rightParen )?
     ;
 
 flushOption
@@ -1889,8 +1889,8 @@ flushTableOption
 
 loadedTableIndexes
     : tableName
-      ( PARTITION '(' (partitionList=uidList | ALL) ')' )?
-      ( indexFormat=(INDEX | KEY)? '(' indexList=uidList ')' )?
+      ( PARTITION leftParen (partitionList=uidList | ALL) rightParen )?
+      ( indexFormat=(INDEX | KEY)? leftParen indexList=uidList rightParen )?
       (IGNORE LEAVES)?
     ;
 
@@ -1999,7 +1999,7 @@ fullColumnName
     ;
 
 indexColumnName
-    : ((uid | STRING_LITERAL) ('(' decimalLiteral ')')? | expression) sortType=(ASC | DESC)?
+    : ((uid | STRING_LITERAL) (leftParen decimalLiteral rightParen)? | expression) sortType=(ASC | DESC)?
     ;
 
 userName
@@ -2169,7 +2169,7 @@ dataType
     ;
 
 collectionOptions
-    : '(' STRING_LITERAL (',' STRING_LITERAL)* ')'
+    : leftParen STRING_LITERAL (',' STRING_LITERAL)* rightParen
     ;
 
 convertedDataType
@@ -2182,15 +2182,15 @@ convertedDataType
     ;
 
 lengthOneDimension
-    : '(' decimalLiteral ')'
+    : leftParen decimalLiteral rightParen
     ;
 
 lengthTwoDimension
-    : '(' decimalLiteral ',' decimalLiteral ')'
+    : leftParen decimalLiteral ',' decimalLiteral rightParen
     ;
 
 lengthTwoOptionalDimension
-    : '(' decimalLiteral (',' decimalLiteral)? ')'
+    : leftParen decimalLiteral (',' decimalLiteral)? rightParen
     ;
 
 
@@ -2205,7 +2205,7 @@ tables
     ;
 
 indexColumnNames
-    : '(' indexColumnName (',' indexColumnName)* ')'
+    : leftParen indexColumnName (',' indexColumnName)* rightParen
     ;
 
 expressions
@@ -2232,14 +2232,14 @@ userVariables
 //    Common Expressons
 
 defaultValue
-    : (NULL_LITERAL | unaryOperator? constant | currentTimestamp | '(' expression ')') (ON UPDATE currentTimestamp)?
+    : (NULL_LITERAL | unaryOperator? constant | currentTimestamp | leftParen expression rightParen) (ON UPDATE currentTimestamp)?
     ;
 
 currentTimestamp
     :
     (
-      (CURRENT_TIMESTAMP | LOCALTIME | LOCALTIMESTAMP) ('(' decimalLiteral? ')')?
-      | NOW '(' decimalLiteral? ')'
+      (CURRENT_TIMESTAMP | LOCALTIME | LOCALTIMESTAMP) (leftParen decimalLiteral? rightParen)?
+      | NOW leftParen decimalLiteral? rightParen
     )
     ;
 
@@ -2260,27 +2260,35 @@ functionCall
     : specificFunction                                              #specificFunctionCall
     | aggregateWindowedFunction                                     #aggregateFunctionCall
     | nonAggregateWindowedFunction                                  #nonAggregateFunctionCall
-    | scalarFunctionName '(' functionArgs? ')'                      #scalarFunctionCall
-    | fullId '(' functionArgs? ')'                                  #udfFunctionCall
+    | scalarFunctionName leftParen functionArgs? rightParen         #scalarFunctionCall
+    | fullId leftParen functionArgs? rightParen                     #udfFunctionCall
     | passwordFunctionClause                                        #passwordFunctionCall
+    ;
+
+leftParen
+    : '('
+    ;
+
+rightParen
+    : ')'
     ;
 
 specificFunction
     : (
       CURRENT_DATE | CURRENT_TIME | CURRENT_TIMESTAMP
       | CURRENT_USER | LOCALTIME
-      ) ('(' ')')?                                                  #simpleFunctionCall
-    | CONVERT '(' expression separator=',' convertedDataType ')'    #dataTypeFunctionCall
-    | CONVERT '(' expression USING charsetName ')'                  #dataTypeFunctionCall
-    | CAST '(' expression AS convertedDataType ')'                  #dataTypeFunctionCall
-    | VALUES '(' fullColumnName ')'                                 #valuesFunctionCall
+      ) (leftParen rightParen)?                                                  #simpleFunctionCall
+    | CONVERT leftParen expression separator=',' convertedDataType rightParen    #dataTypeFunctionCall
+    | CONVERT leftParen expression USING charsetName rightParen                  #dataTypeFunctionCall
+    | CAST leftParen expression AS convertedDataType rightParen                  #dataTypeFunctionCall
+    | VALUES leftParen fullColumnName rightParen                                 #valuesFunctionCall
     | CASE expression caseFuncAlternative+
       (ELSE elseArg=functionArg)? END                               #caseExpressionFunctionCall
     | CASE caseFuncAlternative+
       (ELSE elseArg=functionArg)? END                               #caseFunctionCall
-    | CHAR '(' functionArgs  (USING charsetName)? ')'               #charFunctionCall
+    | CHAR leftParen functionArgs  (USING charsetName)? rightParen               #charFunctionCall
     | POSITION
-      '('
+      leftParen
           (
             positionString=stringLiteral
             | positionExpression=expression
@@ -2290,9 +2298,9 @@ specificFunction
             inString=stringLiteral
             | inExpression=expression
           )
-      ')'                                                           #positionFunctionCall
+      rightParen                                                           #positionFunctionCall
     | (SUBSTR | SUBSTRING)
-      '('
+      leftParen
         (
           sourceString=stringLiteral
           | sourceExpression=expression
@@ -2308,9 +2316,9 @@ specificFunction
             | forExpression=expression
           )
         )?
-      ')'                                                           #substrFunctionCall
+      rightParen                                                           #substrFunctionCall
     | TRIM
-      '('
+      leftParen
         positioinForm=(BOTH | LEADING | TRAILING)
         (
           sourceString=stringLiteral
@@ -2321,9 +2329,9 @@ specificFunction
           fromString=stringLiteral
           | fromExpression=expression
         )
-      ')'                                                           #trimFunctionCall
+      rightParen                                                           #trimFunctionCall
     | TRIM
-      '('
+      leftParen
         (
           sourceString=stringLiteral
           | sourceExpression=expression
@@ -2333,34 +2341,34 @@ specificFunction
           fromString=stringLiteral
           | fromExpression=expression
         )
-      ')'                                                           #trimFunctionCall
+      rightParen                                                           #trimFunctionCall
     | WEIGHT_STRING
-      '('
+      leftParen
         (stringLiteral | expression)
         (AS stringFormat=(CHAR | BINARY)
-        '(' decimalLiteral ')' )?  levelsInWeightString?
-      ')'                                                           #weightFunctionCall
+        leftParen decimalLiteral rightParen )?  levelsInWeightString?
+      rightParen                                                           #weightFunctionCall
     | EXTRACT
-      '('
+      leftParen
         intervalType
         FROM
         (
           sourceString=stringLiteral
           | sourceExpression=expression
         )
-      ')'                                                           #extractFunctionCall
+      rightParen                                                           #extractFunctionCall
     | GET_FORMAT
-      '('
+      leftParen
         datetimeFormat=(DATE | TIME | DATETIME)
         ',' stringLiteral
-      ')'                                                           #getFormatFunctionCall
+      rightParen                                                           #getFormatFunctionCall
     | JSON_VALUE
-      '(' expression
+      leftParen expression
        ',' expression
          (RETURNING convertedDataType)?
          ((NULL_LITERAL | ERROR | (DEFAULT defaultValue)) ON EMPTY)?
          ((NULL_LITERAL | ERROR | (DEFAULT defaultValue)) ON ERROR)?
-       ')'                                                          #jsonValueFunctionCall
+       rightParen                                                          #jsonValueFunctionCall
     ;
 
 caseFuncAlternative
@@ -2381,30 +2389,30 @@ levelInWeightListElement
 
 aggregateWindowedFunction
     : (AVG | MAX | MIN | SUM)
-      '(' aggregator=(ALL | DISTINCT)? functionArg ')' overClause?
-    | COUNT '(' (starArg='*' | aggregator=ALL? functionArg | aggregator=DISTINCT functionArgs) ')' overClause?
+      leftParen aggregator=(ALL | DISTINCT)? functionArg rightParen overClause?
+    | COUNT leftParen (starArg='*' | aggregator=ALL? functionArg | aggregator=DISTINCT functionArgs) rightParen overClause?
     | (
         BIT_AND | BIT_OR | BIT_XOR | STD | STDDEV | STDDEV_POP
         | STDDEV_SAMP | VAR_POP | VAR_SAMP | VARIANCE
-      ) '(' aggregator=ALL? functionArg ')' overClause?
-    | GROUP_CONCAT '('
+      ) leftParen aggregator=ALL? functionArg rightParen overClause?
+    | GROUP_CONCAT leftParen
         aggregator=DISTINCT? functionArgs
         (ORDER BY
           orderByExpression (',' orderByExpression)*
         )? (SEPARATOR separator=STRING_LITERAL)?
-      ')'
+      rightParen
     ;
 
 nonAggregateWindowedFunction
-    : (LAG | LEAD) '(' expression (',' decimalLiteral)? (',' decimalLiteral)? ')' overClause
-    | (FIRST_VALUE | LAST_VALUE) '(' expression ')' overClause
-    | (CUME_DIST | DENSE_RANK | PERCENT_RANK | RANK | ROW_NUMBER) '('')' overClause
-    | NTH_VALUE '(' expression ',' decimalLiteral ')' overClause
-    | NTILE '(' decimalLiteral ')' overClause
+    : (LAG | LEAD) leftParen expression (',' decimalLiteral)? (',' decimalLiteral)? rightParen overClause
+    | (FIRST_VALUE | LAST_VALUE) leftParen expression rightParen overClause
+    | (CUME_DIST | DENSE_RANK | PERCENT_RANK | RANK | ROW_NUMBER) leftParen rightParen overClause
+    | NTH_VALUE leftParen expression ',' decimalLiteral rightParen overClause
+    | NTILE leftParen decimalLiteral rightParen overClause
     ;
 
 overClause
-    : OVER ('(' windowSpec? ')' | windowName)
+    : OVER (leftParen windowSpec? rightParen | windowName)
     ;
 
 windowSpec
@@ -2453,7 +2461,7 @@ scalarFunctionName
     ;
 
 passwordFunctionClause
-    : functionName=(PASSWORD | OLD_PASSWORD) '(' functionArg ')'
+    : functionName=(PASSWORD | OLD_PASSWORD) leftParen functionArg rightParen
     ;
 
 functionArgs
@@ -2480,17 +2488,17 @@ expression
     ;
 
 predicate
-    : predicate NOT? IN '(' (selectStatement | expressions) ')'     #inPredicate
+    : predicate NOT? IN leftParen (selectStatement | expressions) rightParen     #inPredicate
     | predicate IS nullNotnull                                      #isNullPredicate
     | left=predicate comparisonOperator right=predicate             #binaryComparisonPredicate
     | predicate comparisonOperator
-      quantifier=(ALL | ANY | SOME) '(' selectStatement ')'         #subqueryComparisonPredicate
+      quantifier=(ALL | ANY | SOME) leftParen selectStatement rightParen         #subqueryComparisonPredicate
     | predicate NOT? BETWEEN predicate AND predicate                #betweenPredicate
     | predicate SOUNDS LIKE predicate                               #soundsLikePredicate
     | predicate NOT? LIKE predicate (ESCAPE STRING_LITERAL)?        #likePredicate
     | predicate NOT? regex=(REGEXP | RLIKE) predicate               #regexpPredicate
     | (LOCAL_ID VAR_ASSIGN)? expressionAtom                         #expressionAtomPredicate
-    | predicate MEMBER OF '(' predicate ')'                         #jsonMemberOfPredicate
+    | predicate MEMBER OF leftParen predicate rightParen                         #jsonMemberOfPredicate
     ;
 
 
@@ -2503,10 +2511,10 @@ expressionAtom
     | mysqlVariable                                                 #mysqlVariableExpressionAtom
     | unaryOperator expressionAtom                                  #unaryExpressionAtom
     | BINARY expressionAtom                                         #binaryExpressionAtom
-    | '(' expression (',' expression)* ')'                          #nestedExpressionAtom
-    | ROW '(' expression (',' expression)+ ')'                      #nestedRowExpressionAtom
-    | EXISTS '(' selectStatement ')'                                #existsExpressionAtom
-    | '(' selectStatement ')'                                       #subqueryExpressionAtom
+    | leftParen expression (',' expression)* rightParen                          #nestedExpressionAtom
+    | ROW leftParen expression (',' expression)+ rightParen                      #nestedRowExpressionAtom
+    | EXISTS leftParen selectStatement rightParen                                #existsExpressionAtom
+    | leftParen selectStatement rightParen                                       #subqueryExpressionAtom
     | INTERVAL expression intervalType                              #intervalExpressionAtom
     | left=expressionAtom bitOperator right=expressionAtom          #bitExpressionAtom
     | left=expressionAtom mathOperator right=expressionAtom         #mathExpressionAtom
