@@ -1032,7 +1032,7 @@ selectClause
     ;
 
 selectKeyword
-    : SELECT | RETRIEVE | SHOW_ME | DISPLAY | PRESENT | FIND
+    : SELECT | RETRIEVE | SHOW_ME | DISPLAY | PRESENT | FIND | GET
     ;
 
 querySpecificationNointo
