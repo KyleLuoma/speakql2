@@ -1068,10 +1068,15 @@ selectElementDelimiter
     ;
 
 selectElement
-    : fullId '.' '*'                                                #selectStarElement
+    : fullId selectElementDot '*'                                                #selectStarElement
     | fullColumnName (AS? uid)?                                     #selectColumnElement
     | functionCall (AS? uid)?                                       #selectFunctionElement
     | (LOCAL_ID VAR_ASSIGN)? expression (AS? uid)?                  #selectExpressionElement
+    ;
+
+selectElementDot
+    : '.'
+    | SPOKEN_DOT
     ;
 
 selectIntoExpression
@@ -1995,7 +2000,7 @@ tableName
 
 fullColumnName
     : uid (dottedId dottedId? )?
-    | '.' dottedId dottedId?
+    | selectElementDot dottedId dottedId?
     ;
 
 indexColumnName
@@ -2074,7 +2079,7 @@ simpleId
 
 dottedId
     : DOT_ID
-    | '.' uid
+    | selectElementDot uid
     ;
 
 

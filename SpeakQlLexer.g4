@@ -58,6 +58,8 @@ JOIN_WITH_TABLE:                    'JOIN WITH TABLE';
 JOINED_WITH:                        'JOINED WITH';
 JOINED_WITH_TABLE:                  'JOINED WITH TABLE';
 
+SPOKEN_DOT:                         'DOT';
+
 // Common Keywords
 
 ADD:                                 'ADD';
