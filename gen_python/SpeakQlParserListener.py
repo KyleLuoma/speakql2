@@ -4544,6 +4544,24 @@ class SpeakQlParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by SpeakQlParser#leftParen.
+    def enterLeftParen(self, ctx:SpeakQlParser.LeftParenContext):
+        pass
+
+    # Exit a parse tree produced by SpeakQlParser#leftParen.
+    def exitLeftParen(self, ctx:SpeakQlParser.LeftParenContext):
+        pass
+
+
+    # Enter a parse tree produced by SpeakQlParser#rightParen.
+    def enterRightParen(self, ctx:SpeakQlParser.RightParenContext):
+        pass
+
+    # Exit a parse tree produced by SpeakQlParser#rightParen.
+    def exitRightParen(self, ctx:SpeakQlParser.RightParenContext):
+        pass
+
+
     # Enter a parse tree produced by SpeakQlParser#simpleFunctionCall.
     def enterSimpleFunctionCall(self, ctx:SpeakQlParser.SimpleFunctionCallContext):
         pass

@@ -1036,7 +1036,7 @@ selectKeyword
     ;
 
 querySpecificationNointo
-    : SELECT selectSpec* selectElements
+    : selectKeyword selectSpec* selectElements
       fromClause? groupByClause? havingClause? windowClause? orderByClause? limitClause?
     ;
 
@@ -1995,7 +1995,7 @@ tableName
 
 fullColumnName
     : uid (dottedId dottedId? )?
-    | . dottedId dottedId?
+    | '.' dottedId dottedId?
     ;
 
 indexColumnName
