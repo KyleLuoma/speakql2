@@ -1006,12 +1006,20 @@ queryExpressionNointo
     ;
 
 querySpecification
-    : selectExpression tableExpression selectModifierExpression
-    | selectExpression selectModifierExpression tableExpression
-    | tableExpression selectExpression selectModifierExpression
-    | tableExpression selectModifierExpression selectExpression
-    | selectModifierExpression tableExpression selectExpression
-    | selectModifierExpression selectExpression tableExpression
+    : selectThenTableExpression (expressionDelimiter (selectThenTableExpression | tableThenSelectExpression))* selectModifierExpression
+    | tableThenSelectExpression (expressionDelimiter (selectThenTableExpression | tableThenSelectExpression))* selectModifierExpression
+    ;
+
+expressionDelimiter
+    : AND | AND THEN | THEN
+    ;
+
+selectThenTableExpression
+    : selectExpression tableExpression (selectElementDelimiter selectExpression tableExpression)*
+    ;
+
+tableThenSelectExpression
+    : tableExpression selectExpression (selectElementDelimiter tableExpression selectExpression)*
     ;
 
 selectModifierExpression

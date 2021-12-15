@@ -60,6 +60,8 @@ JOINED_WITH_TABLE:                  'JOINED WITH TABLE';
 
 SPOKEN_DOT:                         'DOT';
 
+AND_THEN:                           'AND THEN';
+
 // Common Keywords
 
 ADD:                                 'ADD';
