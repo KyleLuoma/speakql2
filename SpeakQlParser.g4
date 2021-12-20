@@ -1079,9 +1079,13 @@ selectElementDelimiter
 
 selectElement
     : fullId selectElementDot '*'                                                #selectStarElement
-    | fullColumnName (AS? uid)?                                     #selectColumnElement
-    | functionCall (AS? uid)?                                       #selectFunctionElement
-    | (LOCAL_ID VAR_ASSIGN)? expression (AS? uid)?                  #selectExpressionElement
+    | fullColumnName (selectElementAs? uid)?                                     #selectColumnElement
+    | functionCall (selectElementAs? uid)?                                       #selectFunctionElement
+    | (LOCAL_ID VAR_ASSIGN)? expression (selectElementAs? uid)?                  #selectExpressionElement
+    ;
+
+selectElementAs
+    : AS
     ;
 
 selectElementDot
@@ -2417,7 +2421,7 @@ levelInWeightListElement
 aggregateWindowedFunction
     : (AVG | MAX | MIN | SUM)
       leftParen aggregator=(ALL | DISTINCT)? functionArg rightParen overClause?
-    | COUNT leftParen (starArg='*' | aggregator=ALL? functionArg | aggregator=DISTINCT functionArgs) rightParen overClause?
+    | COUNT leftParen (starArg='*' | allAggregatorKeyword? functionArg | distinctAggregatorKeyword functionArgs) rightParen overClause?
     | (
         BIT_AND | BIT_OR | BIT_XOR | STD | STDDEV | STDDEV_POP
         | STDDEV_SAMP | VAR_POP | VAR_SAMP | VARIANCE
@@ -2428,6 +2432,14 @@ aggregateWindowedFunction
           orderByExpression (',' orderByExpression)*
         )? (SEPARATOR separator=STRING_LITERAL)?
       rightParen
+    ;
+
+distinctAggregatorKeyword
+    : aggregator=DISTINCT
+    ;
+
+allAggregatorKeyword
+    : aggregator=ALL
     ;
 
 nonAggregateWindowedFunction
