@@ -975,19 +975,21 @@ indexHintType
 joinPart
     : (INNER | CROSS)? joinKeyword tableSourceItem
       (
-        ON expression
+        onKeyword expression
         | USING leftParen uidList rightParen
       )?                                                            #innerJoin
-    | STRAIGHT_JOIN tableSourceItem (ON expression)?                #straightJoin
+    | STRAIGHT_JOIN tableSourceItem (onKeyword expression)?                #straightJoin
     | (LEFT | RIGHT) OUTER? joinKeyword tableSourceItem
         (
-          ON expression
+          onKeyword expression
           | USING leftParen uidList rightParen
         )                                                           #outerJoin
     | NATURAL ((LEFT | RIGHT) OUTER?)? joinKeyword tableSourceItem         #naturalJoin
     ;
 
-
+onKeyword
+    : ON
+    ;
 
 joinKeyword
     : JOIN | JOIN_TABLE | BY_JOINING | BY_JOINING_TABLE | JOINED_WITH | JOIN_WITH | JOINED_WITH_TABLE | JOIN_WITH_TABLE
@@ -1006,12 +1008,20 @@ queryExpressionNointo
     ;
 
 querySpecification
-    : selectExpression tableExpression selectModifierExpression
-    | selectExpression selectModifierExpression tableExpression
-    | tableExpression selectExpression selectModifierExpression
-    | tableExpression selectModifierExpression selectExpression
-    | selectModifierExpression tableExpression selectExpression
-    | selectModifierExpression selectExpression tableExpression
+    : selectThenTableExpression (expressionDelimiter (selectThenTableExpression | tableThenSelectExpression))* selectModifierExpression
+    | tableThenSelectExpression (expressionDelimiter (selectThenTableExpression | tableThenSelectExpression))* selectModifierExpression
+    ;
+
+expressionDelimiter
+    : AND | AND_THEN | THEN
+    ;
+
+selectThenTableExpression
+    : selectExpression tableExpression
+    ;
+
+tableThenSelectExpression
+    : tableExpression selectExpression
     ;
 
 selectModifierExpression
@@ -1108,7 +1118,11 @@ selectLinesInto
 
 fromClause
     : (fromKeyword tableSources)?
-      (WHERE whereExpr=expression)?
+      (whereKeyword whereExpr=expression)?
+    ;
+
+whereKeyword
+    : WHERE
     ;
 
 fromKeyword
@@ -1116,13 +1130,21 @@ fromKeyword
     ;
 
 groupByClause
-    :  GROUP BY
+    :  groupByKeyword
         groupByItem (',' groupByItem)*
         (WITH ROLLUP)?
     ;
 
+groupByKeyword
+    : GROUP BY
+    ;
+
 havingClause
-    :  HAVING havingExpr=expression
+    :  havingKeyword havingExpr=expression
+    ;
+
+havingKeyword
+    : HAVING
     ;
 
 windowClause
