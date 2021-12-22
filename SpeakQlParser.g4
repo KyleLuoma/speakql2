@@ -952,14 +952,22 @@ tableSource
 
 tableSourceItem
     : tableName
-      (PARTITION leftParen uidList rightParen )? (AS? alias=uid)?
+      (PARTITION leftParen uidList rightParen )? (tableAlias)?
       (indexHint (',' indexHint)* )?                                #atomTableItem
     | (
       selectStatement
       | leftParen parenthesisSubquery=selectStatement rightParen
       )
-      AS? alias=uid                                                 #subqueryTableItem
+      tableAlias                                                 #subqueryTableItem
     | leftParen tableSources rightParen                                          #tableSourcesItem
+    ;
+
+tableAlias
+    : tableAliasAs? alias=uid
+    ;
+
+tableAliasAs
+    : AS
     ;
 
 indexHint
