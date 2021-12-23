@@ -1009,7 +1009,7 @@ outerJoin
     ;
 
 naturalJoin
-    : naturalJoinKeyword ((joinDirection) outerJoinKeyword?)? joinKeyword tableSourceItem  
+    : naturalJoinKeyword ((joinDirection) outerJoinKeyword?)? joinKeyword tableSourceItem
     ;
 
 innerJoinKeyword
