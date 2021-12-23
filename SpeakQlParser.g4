@@ -947,19 +947,20 @@ tableSources
 
 tableSource
     : tableSourceItem joinPart*                                     #tableSourceBase
-    | leftParen tableSourceItem joinPart* rightParen                             #tableSourceNested
+    | leftParen tableSourceItem joinPart* rightParen                #tableSourceNested
     ;
 
 tableSourceItem
-    : tableName
+    : tableName                                                     #onlyTableNameItem
+    | tableName
       (PARTITION leftParen uidList rightParen )? (tableAlias)?
       (indexHint (',' indexHint)* )?                                #atomTableItem
-    | (
-      selectStatement
-      | leftParen parenthesisSubquery=selectStatement rightParen
-      )
-      tableAlias                                                 #subqueryTableItem
-    | leftParen tableSources rightParen                                          #tableSourcesItem
+    | subQueryTable tableAlias                                      #subqueryTableItem
+    | leftParen tableSources rightParen                             #tableSourcesItem
+    ;
+
+subQueryTable
+    : (selectStatement | leftParen parenthesisSubquery=selectStatement rightParen)
     ;
 
 tableAlias
