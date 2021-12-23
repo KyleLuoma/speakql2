@@ -982,18 +982,56 @@ indexHintType
     ;
 
 joinPart
-    : (INNER | CROSS)? joinKeyword tableSourceItem
-      (
-        onKeyword expression
-        | USING leftParen uidList rightParen
-      )?                                                            #innerJoin
-    | STRAIGHT_JOIN tableSourceItem (onKeyword expression)?                #straightJoin
-    | (LEFT | RIGHT) OUTER? joinKeyword tableSourceItem
+    : innerJoin
+    | straightJoin
+    | outerJoin
+    | naturalJoin
+    ;
+
+innerJoin
+    : (innerJoinKeyword)? joinKeyword tableSourceItem
         (
           onKeyword expression
           | USING leftParen uidList rightParen
-        )                                                           #outerJoin
-    | NATURAL ((LEFT | RIGHT) OUTER?)? joinKeyword tableSourceItem         #naturalJoin
+        )?
+    ;
+
+straightJoin
+    : straightJoinKeyword tableSourceItem (onKeyword expression)?
+    ;
+
+outerJoin
+    : (joinDirection) outerJoinKeyword? joinKeyword tableSourceItem
+          (
+            onKeyword expression
+            | USING leftParen uidList rightParen
+          )
+    ;
+
+naturalJoin
+    : naturalJoinKeyword ((joinDirection) outerJoinKeyword?)? joinKeyword tableSourceItem  
+    ;
+
+innerJoinKeyword
+    : INNER
+    | CROSS
+    ;
+
+straightJoinKeyword
+    : STRAIGHT_JOIN
+    ;
+
+outerJoinKeyword
+    : OUTER
+    ;
+
+joinDirection
+    : LEFT
+    | RIGHT
+    ;
+
+naturalJoinKeyword
+    : NATURAL
     ;
 
 onKeyword
