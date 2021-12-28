@@ -960,7 +960,11 @@ tableSourceItem
     ;
 
 subQueryTable
-    : (selectStatement | leftParen parenthesisSubquery=selectStatement rightParen)
+    : subQueryKeyword? (selectStatement | leftParen parenthesisSubquery=selectStatement rightParen)
+    ;
+
+subQueryKeyword
+    : SUBQUERY
     ;
 
 tableAlias

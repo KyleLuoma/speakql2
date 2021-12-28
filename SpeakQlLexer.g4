@@ -62,6 +62,8 @@ SPOKEN_DOT:                         'DOT';
 
 AND_THEN:                           'AND THEN';
 
+SUBQUERY:                           'SUBQUERY';
+
 // Common Keywords
 
 ADD:                                 'ADD';
