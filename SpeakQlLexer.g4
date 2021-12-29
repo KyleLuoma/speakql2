@@ -49,6 +49,7 @@ FIND:                               'FIND';
 
 IN_TABLE:                           'IN TABLE';
 FROM_TABLE:                         'FROM TABLE';
+FROM_TABLES:                        'FROM TABLES';
 
 JOIN_TABLE:                         'JOIN TABLE';
 BY_JOINING:                         'BY JOINING';

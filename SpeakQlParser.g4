@@ -988,7 +988,6 @@ indexHintType
 
 joinPart
     : innerJoin
-    | straightJoin
     | outerJoin
     | naturalJoin
     ;
@@ -999,10 +998,6 @@ innerJoin
           onKeyword expression
           | USING leftParen uidList rightParen
         )?
-    ;
-
-straightJoin
-    : straightJoinKeyword tableSourceItem (onKeyword expression)?
     ;
 
 outerJoin
@@ -1020,10 +1015,6 @@ naturalJoin
 innerJoinKeyword
     : INNER
     | CROSS
-    ;
-
-straightJoinKeyword
-    : STRAIGHT_JOIN
     ;
 
 outerJoinKeyword
@@ -1182,7 +1173,7 @@ whereKeyword
     ;
 
 fromKeyword
-    : FROM | IN_TABLE | FROM_TABLE
+    : FROM | IN_TABLE | FROM_TABLE | FROM_TABLES
     ;
 
 groupByClause
