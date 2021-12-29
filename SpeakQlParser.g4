@@ -942,7 +942,11 @@ orderByExpression
     ;
 
 tableSources
-    : tableSource (',' tableSource)*
+    : tableSource (tableSourceDelimiter tableSource)*
+    ;
+
+tableSourceDelimiter
+    : ',' | AND
     ;
 
 tableSource
@@ -951,20 +955,17 @@ tableSource
     ;
 
 tableSourceItem
-    : tableName                                                     #onlyTableNameItem
+    : subQueryTable tableAlias                                      #subqueryTableItem
+    | tableName                                                     #onlyTableNameItem
     | tableName
       (PARTITION leftParen uidList rightParen )? (tableAlias)?
       (indexHint (',' indexHint)* )?                                #atomTableItem
-    | subQueryTable tableAlias                                      #subqueryTableItem
     | leftParen tableSources rightParen                             #tableSourcesItem
     ;
 
 subQueryTable
-    : subQueryKeyword? (selectStatement | leftParen parenthesisSubquery=selectStatement rightParen)
-    ;
-
-subQueryKeyword
-    : SUBQUERY
+    : (selectStatement | leftParen parenthesisSubquery=selectStatement rightParen)
+    | (selectStatement | leftParen parenthesisSubquery=selectStatement rightParen)
     ;
 
 tableAlias
