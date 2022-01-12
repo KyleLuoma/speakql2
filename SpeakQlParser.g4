@@ -31,7 +31,7 @@ options { tokenVocab=SpeakQlLexer; }
 // Top Level Description
 
 root
-    : sqlStatements? (MINUS MINUS)? EOF
+    : sqlStatements? (MINUS MINUS)? EOF SCHRODINGER
     ;
 
 sqlStatements
@@ -1051,12 +1051,16 @@ queryExpressionNointo
     ;
 
 querySpecification
-    : selectThenTableExpression (expressionDelimiter (selectThenTableExpression | tableThenSelectExpression))* selectModifierExpression
-    | tableThenSelectExpression (expressionDelimiter (selectThenTableExpression | tableThenSelectExpression))* selectModifierExpression
+    : queryOrderSpecification (expressionDelimiter (queryOrderSpecification))* selectModifierExpression
     ;
 
 expressionDelimiter
     : AND | AND_THEN | THEN
+    ;
+
+queryOrderSpecification
+    : selectThenTableExpression
+    | tableThenSelectExpression
     ;
 
 selectThenTableExpression
