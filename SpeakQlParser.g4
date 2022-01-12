@@ -1165,7 +1165,11 @@ selectLinesInto
 
 fromClause
     : (fromKeyword tableSources)?
-      (whereKeyword whereExpr=expression)?
+      (whereKeyword whereExpression)?
+    ;
+
+whereExpression
+    : whereExpr=expression
     ;
 
 whereKeyword
@@ -1178,8 +1182,12 @@ fromKeyword
 
 groupByClause
     :  groupByKeyword
-        groupByItem (',' groupByItem)*
+        groupByItem (groupByItemDelimiter groupByItem)*
         (WITH ROLLUP)?
+    ;
+
+groupByItemDelimiter
+    : ',' | AND
     ;
 
 groupByKeyword
@@ -1199,7 +1207,13 @@ windowClause
     ;
 
 groupByItem
-    : expression order=(ASC | DESC)?
+    : groupByExpression order=(ASC | DESC)?
+    ;
+
+groupByExpression
+    : notOperator=(NOT | '!') groupByExpression
+    | predicate IS NOT? testValue=(TRUE | FALSE | UNKNOWN)
+    | predicate
     ;
 
 limitClause

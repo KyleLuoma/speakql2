@@ -65,6 +65,8 @@ AND_THEN:                           'AND THEN';
 
 SUBQUERY:                           'SUBQUERY';
 
+SCHRODINGER:                        '__SCHROD';
+
 // Common Keywords
 
 ADD:                                 'ADD';
