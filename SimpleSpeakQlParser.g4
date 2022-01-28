@@ -1,6 +1,10 @@
 parser grammar SimpleSpeakQlParser;
 options { tokenVocab=SimpleSpeakQlLexer; }
 
+schrodinger
+    : SCHRODINGER
+    ;
+
 selectStatement
     : querySpecification lockClause?                                                            #simpleSelect
     | queryExpression lockClause?                                                               #parenthesisSelect
@@ -507,10 +511,6 @@ multiOuterJoin
 
 multiNaturalJoin
     : naturalJoinKeyword (( joinDirection ) outerJoinKeyword?)? joinKeyword tableSourceItem withKeyword tableSourceItem
-    ;
-
-joinPartDelimiter
-    : AND | ','
     ;
 
 withKeyword
