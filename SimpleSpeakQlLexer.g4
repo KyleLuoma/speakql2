@@ -47,6 +47,7 @@ PRESENT:                            'PRESENT';
 FIND:                               'FIND';
 
 IN_TABLE:                           'IN TABLE';
+IN_TABLES:                          'IN TABLES';
 FROM_TABLE:                         'FROM TABLE';
 FROM_TABLES:                        'FROM TABLES';
 

@@ -21,20 +21,23 @@ queryOrderSpecification
 
 selectExpression
     : selectClause selectSpec* selectElements selectIntoExpression?
-    | selectClause selectSpec* selectElements ;
+    | selectClause selectSpec* selectElements
+    ;
 
 selectClause
     : selectKeyword
     ;
 
 selectKeyword
-    : SELECT | RETRIEVE | SHOW_ME | DISPLAY | PRESENT | FIND | GET ;
+    : SELECT | RETRIEVE | SHOW_ME | DISPLAY | PRESENT | FIND | GET
+    ;
 
 selectSpec
     : (ALL | DISTINCT | DISTINCTROW)
     | HIGH_PRIORITY | STRAIGHT_JOIN | SQL_SMALL_RESULT | SQL_BIG_RESULT
     | SQL_BUFFER_RESULT | (SQL_CACHE | SQL_NO_CACHE) | SQL_CALC_FOUND_ROWS
     ;
+
 selectElements
     : (star='*' | selectElement ) (selectElementDelimiter selectElement)*
     ;
