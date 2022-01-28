@@ -60,6 +60,8 @@ JOINED_WITH:                        'JOINED WITH';
 JOINED_WITH_TABLE:                  'JOINED WITH TABLE';
 BY_JOINING_WITH_TABLE:              'BY JOINING WITH TABLE';
 
+WITH_TABLE:                         'WITH TABLE';
+
 SPOKEN_DOT:                         'DOT';
 
 AND_THEN:                           'AND THEN';

@@ -2,14 +2,21 @@ parser grammar SimpleSpeakQlParser;
 options { tokenVocab=SimpleSpeakQlLexer; }
 
 selectStatement
-    : querySpecification lockClause?    #simpleSelect
-    | queryExpression lockClause?       #parenthesisSelect
-    | querySpecificationNointo unionStatement+ ( UNION unionType=(ALL | DISTINCT)? (querySpecification
-    | queryExpression) )? orderByClause? limitClause? lockClause? #unionSelect
-    | queryExpressionNointo unionParenthesis+ ( UNION unionType=(ALL | DISTINCT)? queryExpression )? orderByClause? limitClause? lockClause? #unionParenthesisSelect ;
+    : querySpecification lockClause?                                                            #simpleSelect
+    | queryExpression lockClause?                                                               #parenthesisSelect
+    | querySpecificationNointo unionStatement+
+        ( UNION unionType=(ALL | DISTINCT)? (querySpecification
+    | queryExpression) )? orderByClause? limitClause? lockClause?                               #unionSelect
+    | queryExpressionNointo unionParenthesis+
+        ( UNION unionType=(ALL | DISTINCT)? queryExpression )?
+        orderByClause? limitClause? lockClause?                                                 #unionParenthesisSelect
+    ;
 
 querySpecification
-    : queryOrderSpecification (expressionDelimiter (queryOrderSpecification))* selectModifierExpression
+    : queryOrderSpecification selectModifierExpression                                        #singleQuerySpecification
+    | multiJoinExpression? expressionDelimiter? multiQueryOrderSpecification
+        ( expressionDelimiter ( multiQueryOrderSpecification | multiJoinExpression) )*
+        selectModifierExpression                                                              #multiQuerySpecification
     ;
 
 queryOrderSpecification
@@ -18,6 +25,15 @@ queryOrderSpecification
     | tableExpression selectExpression (whereKeyword whereExpression)?
     | tableExpression (whereKeyword whereExpression)? selectExpression
     ;
+
+multiQueryOrderSpecification
+    : selectExpression (whereKeyword whereExpression)? tableExpressionNoJoin
+    | selectExpression tableExpressionNoJoin (whereKeyword whereExpression)?
+    | tableExpressionNoJoin selectExpression (whereKeyword whereExpression)?
+    | tableExpressionNoJoin (whereKeyword whereExpression)? selectExpression
+    ;
+
+
 
 selectExpression
     : selectClause selectSpec* selectElements selectIntoExpression?
@@ -403,8 +419,12 @@ querySpecificationNointo
         windowClause? orderByClause? limitClause?
     ;
 
+fromClauseNoJoin
+    : fromKeyword tableSourceNoJoin
+    ;
+
 fromClause
-    : (fromKeyword tableSources)?
+    : fromKeyword tableSources
     ; //(whereKeyword whereExpression)? //commented out and moved up to queryOrderExpressions ;
 
 fromKeyword
@@ -413,6 +433,11 @@ fromKeyword
 
 tableSources
     : tableSource (tableSourceDelimiter tableSource)*
+    ;
+
+tableSourceNoJoin
+    : tableSourceItem                                                           #tableSourceNoJoinBase
+    | leftParen tableSourceItem rightParen                                      #tableSourceNoJoinNested
     ;
 
 tableSource
@@ -457,6 +482,41 @@ indexHintType
     : JOIN | ORDER BY | GROUP BY
     ;
 
+joinKeyword
+    : JOIN | JOIN_TABLE | BY_JOINING | BY_JOINING_TABLE | JOINED_WITH | JOIN_WITH
+    | JOINED_WITH_TABLE | JOIN_WITH_TABLE | BY_JOINING_WITH_TABLE
+    ;
+
+multiJoinExpression
+    : multiJoinPart+
+    ;
+
+multiJoinPart
+    : multiInnerJoin | multiOuterJoin | multiNaturalJoin
+    ;
+
+multiInnerJoin
+    : ( innerJoinKeyword )? joinKeyword tableSourceItem withKeyword tableSourceItem
+        ( onKeyword expression | USING leftParen uidList rightParen)?
+    ;
+
+multiOuterJoin
+    : ( joinDirection ) outerJoinKeyword? joinKeyword tableSourceItem withKeyword tableSourceItem
+          ( onKeyword expression | USING leftParen uidList rightParen )
+    ;
+
+multiNaturalJoin
+    : naturalJoinKeyword (( joinDirection ) outerJoinKeyword?)? joinKeyword tableSourceItem withKeyword tableSourceItem
+    ;
+
+joinPartDelimiter
+    : AND | ','
+    ;
+
+withKeyword
+    : WITH | WITH_TABLE
+    ;
+
 joinPart
     : innerJoin | outerJoin | naturalJoin
     ;
@@ -467,11 +527,6 @@ innerJoin
 
 innerJoinKeyword
     : INNER | CROSS
-    ;
-
-joinKeyword
-    : JOIN | JOIN_TABLE | BY_JOINING | BY_JOINING_TABLE | JOINED_WITH | JOIN_WITH
-    | JOINED_WITH_TABLE | JOIN_WITH_TABLE | BY_JOINING_WITH_TABLE
     ;
 
 onKeyword
@@ -702,6 +757,10 @@ whereExpression
     : whereExpr=expression
     ;
 
+tableExpressionNoJoin
+    : fromClauseNoJoin
+    ;
+
 tableExpression
-    : fromClause?
+    : fromClause
     ;
