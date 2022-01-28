@@ -1058,17 +1058,26 @@ expressionDelimiter
     : AND | AND_THEN | THEN
     ;
 
+//queryOrderSpecification
+//    : selectThenTableExpression
+//    | tableThenSelectExpression
+//    ;
+
 queryOrderSpecification
-    : selectThenTableExpression
-    | tableThenSelectExpression
+    : selectExpression (whereKeyword whereExpression)? tableExpression
+    | selectExpression tableExpression (whereKeyword whereExpression)?
+    | tableExpression selectExpression (whereKeyword whereExpression)?
+    | tableExpression (whereKeyword whereExpression)? selectExpression
     ;
 
 selectThenTableExpression
-    : selectExpression tableExpression
+    : selectExpression (whereKeyword whereExpression)? tableExpression
+    | selectExpression tableExpression (whereKeyword whereExpression)?
     ;
 
 tableThenSelectExpression
-    : tableExpression selectExpression
+    : tableExpression selectExpression (whereKeyword whereExpression)?
+    | tableExpression (whereKeyword whereExpression)? selectExpression
     ;
 
 selectModifierExpression
@@ -1169,7 +1178,7 @@ selectLinesInto
 
 fromClause
     : (fromKeyword tableSources)?
-      (whereKeyword whereExpression)?
+      //(whereKeyword whereExpression)? //commented out and moved up to queryOrderExpressions
     ;
 
 whereExpression

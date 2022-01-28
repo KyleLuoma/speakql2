@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-lexer grammar SpeakQlLexer;
+lexer grammar SimpleSpeakQlLexer;
 
 channels { MYSQLCOMMENT, ERRORCHANNEL }
 
@@ -57,6 +57,7 @@ JOIN_WITH:                          'JOIN WITH';
 JOIN_WITH_TABLE:                    'JOIN WITH TABLE';
 JOINED_WITH:                        'JOINED WITH';
 JOINED_WITH_TABLE:                  'JOINED WITH TABLE';
+BY_JOINING_WITH_TABLE:              'BY JOINING WITH TABLE';
 
 SPOKEN_DOT:                         'DOT';
 
