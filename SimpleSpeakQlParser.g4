@@ -23,7 +23,8 @@ querySpecification
         selectModifierExpression                                                              #multiQuerySpecification
     ;
 
-queryOrderSpecification
+
+queryOrderSpecification //SPEAKQL FEATURE: Alternate expression ordering
     : selectExpression (whereKeyword whereExpression)? tableExpression
     | selectExpression tableExpression (whereKeyword whereExpression)?
     | tableExpression selectExpression (whereKeyword whereExpression)?
@@ -48,7 +49,8 @@ selectClause
     : selectKeyword
     ;
 
-selectKeyword
+
+selectKeyword //SPEAKQL FEATURE: SELECT keyword synonyms
     : SELECT | RETRIEVE | SHOW_ME | DISPLAY | PRESENT | FIND | GET
     ;
 
@@ -203,7 +205,7 @@ functionNameBase
     | JSON_STORAGE_SIZE | JSON_ARRAYAGG | JSON_OBJECTAGG
     ;
 
-selectElementDot
+selectElementDot //SPEAKQL FEATURE: '.' synonym is the word DOT
     : '.' | SPOKEN_DOT
     ;
 
@@ -259,7 +261,7 @@ specificFunction
         ((NULL_LITERAL | ERROR | (DEFAULT defaultValue)) ON ERROR)? rightParen                      #jsonValueFunctionCall
     ;
 
-leftParen
+leftParen //SPEAKQL MOD: Added because ANTLR provides the tree as a lisp tree, so this is needed to differentiate between lisp tree parens and query parens
     : '('
     ;
 
@@ -291,18 +293,18 @@ predicate
     | predicate MEMBER OF leftParen predicate rightParen                                                #jsonMemberOfPredicate
     ;
 
-expressionDelimiter
+expressionDelimiter //SPEAKQL FEATURE: delimiter between partitioned simple queries
     : AND | AND_THEN | THEN
     ;
 
-selectModifierExpression
+selectModifierExpression //SPEAKQL FEATURE: enables reordering by including optional statements in a single expression
     : groupByClause? havingClause? windowClause? orderByClause? limitClause?
     | groupByClause? havingClause? windowClause? orderByClause? limitClause? selectIntoExpression?
     ;
 
-groupByClause
+groupByClause //SPEAKQL FEATURE: Added aggregate function option to end of group by clause to enable table-spanning aggregation using the simple query partitioning feature
     : groupByKeyword groupByItem (groupByItemDelimiter groupByItem)* (WITH ROLLUP)?
-            (expressionDelimiter selectKeyword? aggregateWindowedFunction)?
+            (expressionDelimiter selectKeyword? aggregateWindowedFunction (selectElementDelimiter aggregateWindowedFunction)* )?
     ;
 
 groupByKeyword
@@ -424,7 +426,7 @@ querySpecificationNointo
         windowClause? orderByClause? limitClause?
     ;
 
-fromClauseNoJoin
+fromClauseNoJoin //SPEAKQL FEATURE: This is the from clause used by the simple query partition. If a query has a query expression delimiter, then this rule is used.
     : fromKeyword tableSourceNoJoin
     ;
 
@@ -432,7 +434,7 @@ fromClause
     : fromKeyword tableSources
     ; //(whereKeyword whereExpression)? //commented out and moved up to queryOrderExpressions ;
 
-fromKeyword
+fromKeyword //SPEAKQL FEATURE: FROM keyword synonyms
     : FROM | FROM_TABLE | FROM_TABLES | IN | IN_TABLE | IN_TABLES
     ;
 
@@ -440,7 +442,7 @@ tableSources
     : tableSource (tableSourceDelimiter tableSource)*
     ;
 
-tableSourceNoJoin
+tableSourceNoJoin //SPEAKQL FEATURE: Used in queries with an expressionDelimiter
     : tableSourceItem                                                           #tableSourceNoJoinBase
     | leftParen tableSourceItem rightParen                                      #tableSourceNoJoinNested
     ;
@@ -487,12 +489,12 @@ indexHintType
     : JOIN | ORDER BY | GROUP BY
     ;
 
-joinKeyword
+joinKeyword //SPEAKQL FEATURE: JOIN keyword synonyms
     : JOIN | JOIN_TABLE | BY_JOINING | BY_JOINING_TABLE | JOINED_WITH | JOIN_WITH
     | JOINED_WITH_TABLE | JOIN_WITH_TABLE | BY_JOINING_WITH_TABLE
     ;
 
-multiJoinExpression
+multiJoinExpression //SPEAKQL FEATURE: New join semantics to isolate all join statements into a single sub-expression
     : multiJoinPart+
     ;
 
@@ -500,7 +502,7 @@ multiJoinPart
     : multiInnerJoin | multiOuterJoin | multiNaturalJoin
     ;
 
-multiInnerJoin
+multiInnerJoin //SPEAKQL FEATURE: Explicit two-table join statements JOIN TABLE_ONE WITH TABLE_TWO ON...
     : ( innerJoinKeyword )? joinKeyword tableSourceItem withKeyword tableSourceItem
         ( onKeyword expression | USING leftParen uidList rightParen)?
     ;
@@ -514,7 +516,7 @@ multiNaturalJoin
     : naturalJoinKeyword (( joinDirection ) outerJoinKeyword?)? joinKeyword tableSourceItem withKeyword tableSourceItem
     ;
 
-withKeyword
+withKeyword //SPEAKQL FEATURE: WITH keyword associates two tables in a multi-join statement
     : WITH | WITH_TABLE
     ;
 
@@ -539,7 +541,7 @@ outerJoin
         ( onKeyword expression | USING leftParen uidList rightParen )
     ;
 
-joinDirection
+joinDirection //SPEAKQL MOD: Added joinDirection rule to make it easier to work with during translation
     : LEFT | RIGHT
     ;
 
@@ -555,7 +557,7 @@ naturalJoinKeyword
     : NATURAL
     ;
 
-tableSourceDelimiter
+tableSourceDelimiter //SPEAKQL FEATURE: Added ',' synonym for more natural language
     : ',' | AND
     ;
 
@@ -747,7 +749,7 @@ passwordFunctionClause
     : functionName=(PASSWORD | OLD_PASSWORD) leftParen functionArg rightParen
     ;
 
-selectElementDelimiter
+selectElementDelimiter //SPEAKQL FEATURE: ',' synonym for select elements for more natural language
     : ',' | AND
     ;
 
