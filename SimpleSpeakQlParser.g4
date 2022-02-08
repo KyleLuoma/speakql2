@@ -302,6 +302,7 @@ selectModifierExpression
 
 groupByClause
     : groupByKeyword groupByItem (groupByItemDelimiter groupByItem)* (WITH ROLLUP)?
+            (expressionDelimiter selectKeyword? aggregateWindowedFunction)?
     ;
 
 groupByKeyword
