@@ -73,6 +73,8 @@ SCHRODINGER:                        '__SCHROD';
 AUTOMATIC:                          'AUTOMATIC';
 AUTOMATICALLY:                      'AUTOMATICALLY';
 
+NOTHING:                            'NOTHING';
+
 // Common Keywords
 
 ADD:                                 'ADD';

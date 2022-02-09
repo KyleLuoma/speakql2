@@ -43,15 +43,19 @@ multiQueryOrderSpecification
 selectExpression
     : selectClause selectSpec* selectElements selectIntoExpression?
     | selectClause selectSpec* selectElements
+    | selectClause nothingKeyword
     ;
 
 selectClause
     : selectKeyword
     ;
 
-
 selectKeyword //SPEAKQL FEATURE: SELECT keyword synonyms
     : SELECT | RETRIEVE | SHOW_ME | DISPLAY | PRESENT | FIND | GET
+    ;
+
+nothingKeyword //SPEAKQL FEATURE: Allows us to specify a where condition in an unbundled query without selecting any columns
+    : NOTHING
     ;
 
 selectSpec
