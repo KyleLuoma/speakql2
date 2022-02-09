@@ -70,6 +70,9 @@ SUBQUERY:                           'SUBQUERY';
 
 SCHRODINGER:                        '__SCHROD';
 
+AUTOMATIC:                          'AUTOMATIC';
+AUTOMATICALLY:                      'AUTOMATICALLY';
+
 // Common Keywords
 
 ADD:                                 'ADD';

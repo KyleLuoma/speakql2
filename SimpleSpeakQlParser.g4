@@ -308,11 +308,16 @@ groupByClause //SPEAKQL FEATURE: Added aggregate function option to end of group
     ;
 
 groupByKeyword
-    : GROUP BY
+    : GROUP BY | GROUP
     ;
 
 groupByItem
     : groupByExpression order=(ASC | DESC)?
+    | automaticGroupByKeyword
+    ;
+
+automaticGroupByKeyword
+    : AUTOMATIC | AUTOMATICALLY
     ;
 
 groupByExpression
