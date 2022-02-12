@@ -18,9 +18,9 @@ selectStatement
 
 querySpecification
     : queryOrderSpecification selectModifierExpression                                        #singleQuerySpecification
-    | multiJoinExpression? expressionDelimiter? multiQueryOrderSpecification
+    | (multiJoinExpression expressionDelimiter)? multiQueryOrderSpecification
         ( expressionDelimiter ( multiQueryOrderSpecification | multiJoinExpression) )*
-        selectModifierExpression                                                              #multiQuerySpecification
+        expressionDelimiter selectModifierExpression                                          #multiQuerySpecification
     ;
 
 
@@ -43,7 +43,7 @@ multiQueryOrderSpecification
 selectExpression
     : selectClause selectSpec* selectElements selectIntoExpression?
     | selectClause selectSpec* selectElements
-    | selectClause nothingKeyword
+    | selectClause nothingElement
     ;
 
 selectClause
@@ -51,7 +51,11 @@ selectClause
     ;
 
 selectKeyword //SPEAKQL FEATURE: SELECT keyword synonyms
-    : SELECT | RETRIEVE | SHOW_ME | DISPLAY | PRESENT | FIND | GET
+    : SELECT | RETRIEVE | SHOW_ME | DISPLAY | PRESENT | FIND | GET | WHAT_IS | WHAT_ARE | WHAT_IS_THE | WHAT_ARE_THE
+    ;
+
+nothingElement
+    : nothingKeyword
     ;
 
 nothingKeyword //SPEAKQL FEATURE: Allows us to specify a where condition in an unbundled query without selecting any columns
@@ -504,7 +508,7 @@ joinKeyword //SPEAKQL FEATURE: JOIN keyword synonyms
     ;
 
 multiJoinExpression //SPEAKQL FEATURE: New join semantics to isolate all join statements into a single sub-expression
-    : multiJoinPart+
+    : multiJoinPart (expressionDelimiter multiJoinPart)*
     ;
 
 multiJoinPart

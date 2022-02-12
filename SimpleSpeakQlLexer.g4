@@ -45,6 +45,10 @@ SHOW_ME:                            'SHOW ME';
 DISPLAY:                            'DISPLAY';
 PRESENT:                            'PRESENT';
 FIND:                               'FIND';
+WHAT_IS:                            'WHAT IS';
+WHAT_ARE:                           'WHAT ARE';
+WHAT_IS_THE:                        'WHAT IS THE';
+WHAT_ARE_THE:                       'WHAT ARE THE';
 
 IN_TABLE:                           'IN TABLE';
 IN_TABLES:                          'IN TABLES';
