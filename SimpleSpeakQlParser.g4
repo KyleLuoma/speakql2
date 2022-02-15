@@ -270,11 +270,11 @@ specificFunction
     ;
 
 leftParen //SPEAKQL MOD: Added because ANTLR provides the tree as a lisp tree, so this is needed to differentiate between lisp tree parens and query parens
-    : '('
+    : '(' | OPEN_PAREN | LEFT_PAREN | OPEN_PARENTHESIS | LEFT_PARENTHESIS
     ;
 
 rightParen
-    : ')'
+    : ')' | CLOSE_PAREN | RIGHT_PAREN | CLOSE_PARENTHESIS | RIGHT_PARENTHESIS
     ;
 
 expression
@@ -451,8 +451,12 @@ fromKeyword //SPEAKQL FEATURE: FROM keyword synonyms
     : FROM | FROM_TABLE | FROM_TABLES | IN | IN_TABLE | IN_TABLES
     ;
 
+tableKeyword
+    : TABLE
+    ;
+
 tableSources
-    : tableSource (tableSourceDelimiter tableSource)*
+    : theKeyword? tableSource tableKeyword? (tableSourceDelimiter theKeyword? tableSource tableKeyword?)*
     ;
 
 tableSourceNoJoin //SPEAKQL FEATURE: Used in queries with an expressionDelimiter
@@ -467,7 +471,7 @@ tableSource
 
 tableSourceItem
     : subQueryTable tableAlias                                                  #subqueryTableItem
-    | tableName                                                                 #onlyTableNameItem
+    | theKeyword? tableName tableKeyword?                                       #onlyTableNameItem
     | tableName (PARTITION leftParen uidList rightParen )?
         (tableAlias)? (indexHint (',' indexHint)* )?                            #atomTableItem
     | leftParen tableSources rightParen                                         #tableSourcesItem
@@ -719,13 +723,22 @@ currentTimestamp
     ;
 
 aggregateWindowedFunction
-    : (AVG | MAX | MIN | SUM) leftParen aggregator=(ALL | DISTINCT)? functionArg rightParen overClause?
-    | COUNT leftParen (starArg='*' | allAggregatorKeyword? functionArg
-    | distinctAggregatorKeyword functionArgs) rightParen overClause?
+    : theKeyword? (AVG | MAX | MIN | SUM) ofKeyword? leftParen aggregator=(ALL | DISTINCT)? functionArg rightParen overClause?
+    | theKeyword? COUNT ofKeyword? leftParen (starArg='*' | allAggregatorKeyword? functionArg
+        | distinctAggregatorKeyword functionArgs) rightParen overClause?
     | ( BIT_AND | BIT_OR | BIT_XOR | STD | STDDEV | STDDEV_POP | STDDEV_SAMP | VAR_POP | VAR_SAMP | VARIANCE )
         leftParen aggregator=ALL? functionArg rightParen overClause?
     | GROUP_CONCAT leftParen aggregator=DISTINCT? functionArgs
         (ORDER BY orderByExpression (',' orderByExpression)* )? (SEPARATOR separator=STRING_LITERAL)? rightParen
+    ;
+
+//SpeakQl feature / syntactic sugar: OF and THE keywords to make speaking aggregate functions more natural
+ofKeyword
+    : OF
+    ;
+
+theKeyword
+    : THE
     ;
 
 functionArg

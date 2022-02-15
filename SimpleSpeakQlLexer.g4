@@ -79,6 +79,17 @@ AUTOMATICALLY:                      'AUTOMATICALLY';
 
 NOTHING:                            'NOTHING';
 
+OPEN_PARENTHESIS:                   'OPEN PARENTHESIS';
+LEFT_PARENTHESIS:                   'LEFT PARENTHESIS';
+CLOSE_PARENTHESIS:                  'CLOSE PARENTHESIS';
+RIGHT_PARENTHESIS:                  'RIGHT PARENTHESIS';
+OPEN_PAREN:                         'OPEN PAREN';
+LEFT_PAREN:                         'LEFT PAREN';
+CLOSE_PAREN:                        'CLOSE PAREN';
+RIGHT_PAREN:                        'RIGHT PAREN';
+
+THE:                                'THE';
+
 // Common Keywords
 
 ADD:                                 'ADD';
