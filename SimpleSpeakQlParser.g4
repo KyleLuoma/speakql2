@@ -1,8 +1,9 @@
 parser grammar SimpleSpeakQlParser;
 options { tokenVocab=SimpleSpeakQlLexer; }
 
-schrodinger
-    : SCHRODINGER
+
+start
+    : selectStatement END_OF_FILE?
     ;
 
 selectStatement
@@ -20,7 +21,7 @@ querySpecification
     : queryOrderSpecification selectModifierExpression                                        #singleQuerySpecification
     | (multiJoinExpression expressionDelimiter)? multiQueryOrderSpecification
         ( expressionDelimiter ( multiQueryOrderSpecification | multiJoinExpression) )*
-        expressionDelimiter selectModifierExpression                                          #multiQuerySpecification
+        (expressionDelimiter selectModifierExpression)?                                       #multiQuerySpecification
     ;
 
 
@@ -59,7 +60,7 @@ nothingElement
     ;
 
 nothingKeyword //SPEAKQL FEATURE: Allows us to specify a where condition in an unbundled query without selecting any columns
-    : NOTHING
+    : NOTHING | NO_COLUMNS
     ;
 
 selectSpec
@@ -288,8 +289,8 @@ logicalOperator
     : AND | '&' '&' | XOR | OR | '|' '|'
     ;
 
-predicate
-    : predicate NOT? IN leftParen (selectStatement | expressions) rightParen                            #inPredicate
+predicate //SpeakQL Feature: Optional 'IS' in in predicate
+    : predicate NOT? isKeyword? IN leftParen (selectStatement | expressions) rightParen                 #inPredicate
     | predicate IS nullNotnull                                                                          #isNullPredicate
     | left=predicate comparisonOperator right=predicate                                                 #binaryComparisonPredicate
     | predicate comparisonOperator quantifier=(ALL | ANY | SOME) leftParen selectStatement rightParen   #subqueryComparisonPredicate
@@ -301,8 +302,12 @@ predicate
     | predicate MEMBER OF leftParen predicate rightParen                                                #jsonMemberOfPredicate
     ;
 
+isKeyword
+    : IS
+    ;
+
 expressionDelimiter //SPEAKQL FEATURE: delimiter between partitioned simple queries
-    : AND | AND_THEN | THEN
+    : AND_THEN | THEN
     ;
 
 selectModifierExpression //SPEAKQL FEATURE: enables reordering by including optional statements in a single expression
@@ -478,8 +483,7 @@ tableSourceItem
     ;
 
 subQueryTable
-    : (selectStatement | leftParen parenthesisSubquery=selectStatement rightParen)
-    | (selectStatement | leftParen parenthesisSubquery=selectStatement rightParen)
+    : leftParen parenthesisSubquery=selectStatement rightParen
     ;
 
 tableAlias
@@ -793,3 +797,7 @@ tableExpressionNoJoin
 tableExpression
     : fromClause
     ;
+
+//schrodinger
+//    : SCHRODINGER
+//    ;

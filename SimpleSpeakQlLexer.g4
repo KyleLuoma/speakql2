@@ -40,6 +40,8 @@ LINE_COMMENT:                        (
 // Keywords
 
 // SpeakQL 2 Keywords
+END_OF_FILE:                        '<EOF>';
+
 RETRIEVE:                           'RETRIEVE';
 SHOW_ME:                            'SHOW ME';
 DISPLAY:                            'DISPLAY';
@@ -78,6 +80,7 @@ AUTOMATIC:                          'AUTOMATIC';
 AUTOMATICALLY:                      'AUTOMATICALLY';
 
 NOTHING:                            'NOTHING';
+NO_COLUMNS:                         'NO COLUMNS';
 
 OPEN_PARENTHESIS:                   'OPEN PARENTHESIS';
 LEFT_PARENTHESIS:                   'LEFT PARENTHESIS';
