@@ -7,14 +7,14 @@ start
     ;
 
 selectStatement
-    : querySpecification lockClause?                                                            #simpleSelect
-    | queryExpression lockClause?                                                               #parenthesisSelect
-    | querySpecificationNointo unionStatement+
-        ( UNION unionType=(ALL | DISTINCT)? (querySpecification
-    | queryExpression) )? orderByClause? limitClause? lockClause?                               #unionSelect
-    | queryExpressionNointo unionParenthesis+
-        ( UNION unionType=(ALL | DISTINCT)? queryExpression )?
-        orderByClause? limitClause? lockClause?                                                 #unionParenthesisSelect
+    : querySpecification                                                                       #simpleSelect
+    | queryExpression                                                                          #parenthesisSelect
+//    | querySpecificationNointo unionStatement+
+//        ( UNION unionType=(ALL | DISTINCT)? (querySpecification
+//    | queryExpression) )? orderByClause? limitClause? lockClause?                               #unionSelect
+//    | queryExpressionNointo unionParenthesis+
+//        ( UNION unionType=(ALL | DISTINCT)? queryExpression )?
+//        orderByClause? limitClause? lockClause?                                                 #unionParenthesisSelect
     ;
 
 querySpecification
@@ -42,7 +42,7 @@ multiQueryOrderSpecification
 
 
 selectExpression
-    : selectClause selectSpec* selectElements selectIntoExpression?
+    : selectClause selectSpec* selectElements //selectIntoExpression?
     | selectClause selectSpec* selectElements
     | selectClause nothingElement
     ;
@@ -65,8 +65,8 @@ nothingKeyword //SPEAKQL FEATURE: Allows us to specify a where condition in an u
 
 selectSpec
     : (ALL | DISTINCT | DISTINCTROW)
-    | HIGH_PRIORITY | STRAIGHT_JOIN | SQL_SMALL_RESULT | SQL_BIG_RESULT
-    | SQL_BUFFER_RESULT | (SQL_CACHE | SQL_NO_CACHE) | SQL_CALC_FOUND_ROWS
+    //| HIGH_PRIORITY | STRAIGHT_JOIN | SQL_SMALL_RESULT | SQL_BIG_RESULT
+    //| SQL_BUFFER_RESULT | (SQL_CACHE | SQL_NO_CACHE) | SQL_CALC_FOUND_ROWS
     ;
 
 selectElements
@@ -75,8 +75,8 @@ selectElements
 
 selectElement
     : fullId selectElementDot '*'                                   #selectStarElement
-    | fullColumnName (selectElementAs? uid)?                        #selectColumnElement
-    | functionCall (selectElementAs? uid)?                          #selectFunctionElement
+    | fullColumnName (selectElementAs uid)?                         #selectColumnElement //SpeakQl constraint: column aliases MUST use the AS keyword
+    | functionCall (selectElementAs uid)?                           #selectFunctionElement //SpeakQl constraint: function aliases MUST use the AS keyword
     | (LOCAL_ID VAR_ASSIGN)? expression (selectElementAs? uid)?     #selectExpressionElement
     ;
 
@@ -89,83 +89,84 @@ uid
     ; //| DOUBLE_QUOTE_ID | REVERSE_QUOTE_ID | CHARSET_REVERSE_QOUTE_STRING ;
 
 simpleId
-    : ID | charsetNameBase | transactionLevelBase | engineName
-    | privilegesBase | intervalTypeBase | dataTypeBase
-    | keywordsCanBeId | functionNameBase
+    : ID | intervalTypeBase //| keywordsCanBeId
+    //| charsetNameBase | transactionLevelBase | engineName
+    //| privilegesBase  | dataTypeBase
+     //| functionNameBase
     ;
 
-charsetNameBase
-    : ARMSCII8 | ASCII | BIG5 | BINARY | CP1250 | CP1251 | CP1256 | CP1257 | CP850 | CP852
-    | CP866 | CP932 | DEC8 | EUCJPMS | EUCKR | GB18030 | GB2312 | GBK | GEOSTD8 | GREEK
-    | HEBREW | HP8 | KEYBCS2 | KOI8R | KOI8U | LATIN1 | LATIN2 | LATIN5 | LATIN7 | MACCE
-    | MACROMAN | SJIS | SWE7 | TIS620 | UCS2 | UJIS | UTF16 | UTF16LE | UTF32 | UTF8 | UTF8MB3 | UTF8MB4
-    ;
-
-transactionLevelBase
-    : REPEATABLE | COMMITTED | UNCOMMITTED | SERIALIZABLE
-    ;
-
-engineName
-    : ARCHIVE | BLACKHOLE | CSV | FEDERATED | INNODB | MEMORY | MRG_MYISAM | MYISAM | NDB | NDBCLUSTER
-    | PERFORMANCE_SCHEMA | TOKUDB | ID | STRING_LITERAL | REVERSE_QUOTE_ID | CONNECT
-    ;
-
-privilegesBase
-    : TABLES | ROUTINE | EXECUTE | FILE | PROCESS | RELOAD | SHUTDOWN | SUPER | PRIVILEGES
-    ;
+//charsetNameBase
+//    : ARMSCII8 | ASCII | BIG5 | BINARY | CP1250 | CP1251 | CP1256 | CP1257 | CP850 | CP852
+//    | CP866 | CP932 | DEC8 | EUCJPMS | EUCKR | GB18030 | GB2312 | GBK | GEOSTD8 | GREEK
+//    | HEBREW | HP8 | KEYBCS2 | KOI8R | KOI8U | LATIN1 | LATIN2 | LATIN5 | LATIN7 | MACCE
+//    | MACROMAN | SJIS | SWE7 | TIS620 | UCS2 | UJIS | UTF16 | UTF16LE | UTF32 | UTF8 | UTF8MB3 | UTF8MB4
+//    ;
+//
+//transactionLevelBase
+//    : REPEATABLE | COMMITTED | UNCOMMITTED | SERIALIZABLE
+//    ;
+//
+//engineName
+//    : ARCHIVE | BLACKHOLE | CSV | FEDERATED | INNODB | MEMORY | MRG_MYISAM | MYISAM | NDB | NDBCLUSTER
+//    | PERFORMANCE_SCHEMA | TOKUDB | ID | STRING_LITERAL | REVERSE_QUOTE_ID | CONNECT
+//    ;
+//
+//privilegesBase
+//    : TABLES | ROUTINE | EXECUTE | FILE | PROCESS | RELOAD | SHUTDOWN | SUPER | PRIVILEGES
+//    ;
 
 intervalTypeBase
     : QUARTER | MONTH | DAY | HOUR | MINUTE | WEEK | SECOND | MICROSECOND
     ;
 
-dataTypeBase
-    : DATE | TIME | TIMESTAMP | DATETIME | YEAR | ENUM | TEXT
-    ;
+//dataTypeBase
+//    : DATE | TIME | TIMESTAMP | DATETIME | YEAR | ENUM | TEXT
+//    ;
 
-keywordsCanBeId
-    : ACCOUNT | ACTION | AFTER | AGGREGATE | ALGORITHM | ANY | AT | AUDIT_ADMIN | AUTHORS | AUTOCOMMIT
-    | AUTOEXTEND_SIZE | AUTO_INCREMENT | AVG | AVG_ROW_LENGTH | BACKUP_ADMIN | BEGIN | BINLOG | BINLOG_ADMIN
-    | BINLOG_ENCRYPTION_ADMIN | BIT | BIT_AND | BIT_OR | BIT_XOR | BLOCK | BOOL | BOOLEAN | BTREE | CACHE
-    | CASCADED | CHAIN | CHANGED | CHANNEL | CHECKSUM | PAGE_CHECKSUM | CATALOG_NAME | CIPHER | CLASS_ORIGIN | CLIENT
-    | CLONE_ADMIN | CLOSE | COALESCE | CODE | COLUMNS | COLUMN_FORMAT | COLUMN_NAME | COMMENT | COMMIT | COMPACT
-    | COMPLETION | COMPRESSED | COMPRESSION | CONCURRENT | CONNECT | CONNECTION | CONNECTION_ADMIN | CONSISTENT
-    | CONSTRAINT_CATALOG | CONSTRAINT_NAME | CONSTRAINT_SCHEMA | CONTAINS | CONTEXT | CONTRIBUTORS | COPY | COUNT
-    | CPU | CURRENT | CURSOR_NAME | DATA | DATAFILE | DEALLOCATE | DEFAULT_AUTH | DEFINER | DELAY_KEY_WRITE
-    | DES_KEY_FILE | DIAGNOSTICS | DIRECTORY | DISABLE | DISCARD | DISK | DO | DUMPFILE | DUPLICATE | DYNAMIC
-    | ENABLE | ENCRYPTION | ENCRYPTION_KEY_ADMIN | END | ENDS | ENGINE | ENGINES | ERROR | ERRORS | ESCAPE | EUR
-    | EVEN | EVENT | EVENTS | EVERY | EXCEPT | EXCHANGE | EXCLUSIVE | EXPIRE | EXPORT | EXTENDED | EXTENT_SIZE | FAST
-    | FAULTS | FIELDS | FILE_BLOCK_SIZE | FILTER | FIREWALL_ADMIN | FIREWALL_USER | FIRST | FIXED | FLUSH | FOLLOWS
-    | FOUND | FULL | FUNCTION | GENERAL | GLOBAL | GRANTS | GROUP | GROUP_CONCAT | GROUP_REPLICATION
-    | GROUP_REPLICATION_ADMIN | HANDLER | HASH | HELP | HOST | HOSTS | IDENTIFIED | IGNORE_SERVER_IDS | IMPORT
-    | INDEXES | INITIAL_SIZE | INNODB_REDO_LOG_ARCHIVE | INPLACE | INSERT_METHOD | INSTALL | INSTANCE | INTERNAL
-    | INVOKER | IO | IO_THREAD | IPC | ISO | ISOLATION | ISSUER | JIS | JSON | KEY_BLOCK_SIZE | LANGUAGE | LAST
-    | LEAVES | LESS | LEVEL | LIST | LOCAL | LOGFILE | LOGS | MASTER | MASTER_AUTO_POSITION | MASTER_CONNECT_RETRY
-    | MASTER_DELAY | MASTER_HEARTBEAT_PERIOD | MASTER_HOST | MASTER_LOG_FILE | MASTER_LOG_POS | MASTER_PASSWORD
-    | MASTER_PORT | MASTER_RETRY_COUNT | MASTER_SSL | MASTER_SSL_CA | MASTER_SSL_CAPATH | MASTER_SSL_CERT
-    | MASTER_SSL_CIPHER | MASTER_SSL_CRL | MASTER_SSL_CRLPATH | MASTER_SSL_KEY | MASTER_TLS_VERSION | MASTER_USER
-    | MAX_CONNECTIONS_PER_HOUR | MAX_QUERIES_PER_HOUR | MAX | MAX_ROWS | MAX_SIZE | MAX_UPDATES_PER_HOUR
-    | MAX_USER_CONNECTIONS | MEDIUM | MEMBER | MEMORY | MERGE | MESSAGE_TEXT | MID | MIGRATE | MIN | MIN_ROWS
-    | MODE | MODIFY | MUTEX | MYSQL | MYSQL_ERRNO | NAME | NAMES | NCHAR | NDB_STORED_USER | NEVER | NEXT | NO
-    | NODEGROUP | NONE | NUMBER | OFFLINE | ODBC | OFFSET | OF | OJ | OLD_PASSWORD | ONE | ONLINE | ONLY | OPEN
-    | OPTIMIZER_COSTS  | OPTIONS | ORDER | OWNER | PACK_KEYS | PAGE | PARSER | PARTIAL | PARTITIONING | PARTITIONS
-    | PASSWORD | PERSIST_RO_VARIABLES_ADMIN | PHASE | PLUGINS | PLUGIN_DIR | PLUGIN | PORT | PRECEDES | PREPARE
-    | PRESERVE | PREV | PROCESSLIST | PROFILE | PROFILES | PROXY | QUERY | QUICK | REBUILD | RECOVER
-    | REDO_BUFFER_SIZE | REDUNDANT | RELAY | RELAYLOG | RELAY_LOG_FILE | RELAY_LOG_POS | REMOVE | REORGANIZE
-    | REPAIR | REPLICATE_DO_DB | REPLICATE_DO_TABLE | REPLICATE_IGNORE_DB | REPLICATE_IGNORE_TABLE
-    | REPLICATE_REWRITE_DB | REPLICATE_WILD_DO_TABLE | REPLICATE_WILD_IGNORE_TABLE | REPLICATION | REPLICATION_APPLIER
-    | REPLICATION_SLAVE_ADMIN | RESET | RESOURCE_GROUP_ADMIN | RESOURCE_GROUP_USER | RESUME | RETURNED_SQLSTATE
-    | RETURNS | ROLE | ROLE_ADMIN | ROLLBACK | ROLLUP | ROTATE | ROW | ROWS | ROW_FORMAT | SAVEPOINT | SCHEDULE
-    | SCHEMA_NAME | SECURITY | SERIAL | SERVER | SESSION | SESSION_VARIABLES_ADMIN | SET_USER_ID | SHARE | SHARED
-    | SHOW_ROUTINE | SIGNED | SIMPLE | SLAVE | SLOW | SNAPSHOT | SOCKET | SOME | SONAME | SOUNDS | SOURCE
-    | SQL_AFTER_GTIDS | SQL_AFTER_MTS_GAPS | SQL_BEFORE_GTIDS | SQL_BUFFER_RESULT | SQL_CACHE | SQL_NO_CACHE
-    | SQL_THREAD | STACKED | START | STARTS | STATS_AUTO_RECALC | STATS_PERSISTENT | STATS_SAMPLE_PAGES | STATUS
-    | STD | STDDEV | STDDEV_POP | STDDEV_SAMP | STOP | STORAGE | STRING | SUBCLASS_ORIGIN | SUBJECT | SUBPARTITION
-    | SUBPARTITIONS | SUM | SUSPEND | SWAPS | SWITCHES | SYSTEM_VARIABLES_ADMIN | TABLE_NAME | TABLESPACE
-    | TABLE_ENCRYPTION_ADMIN | TEMPORARY | TEMPTABLE | THAN | TRADITIONAL | TRANSACTION | TRANSACTIONAL | TRIGGERS
-    | TRUNCATE | UNDEFINED | UNDOFILE | UNDO_BUFFER_SIZE | UNINSTALL | UNKNOWN | UNTIL | UPGRADE | USA | USER
-    | USE_FRM | USER_RESOURCES | VALIDATION | VALUE | VAR_POP | VAR_SAMP | VARIABLES | VARIANCE | VERSION_TOKEN_ADMIN
-    | VIEW | WAIT | WARNINGS | WITHOUT | WORK | WRAPPER | X509 | XA | XA_RECOVER_ADMIN | XML | SPOKEN_DOT
-    ;
+//keywordsCanBeId
+//    : ACCOUNT | ACTION | AFTER | AGGREGATE | ALGORITHM | ANY | AT | AUDIT_ADMIN | AUTHORS | AUTOCOMMIT
+//    | AUTOEXTEND_SIZE | AUTO_INCREMENT | AVG | AVG_ROW_LENGTH | BACKUP_ADMIN | BEGIN | BINLOG | BINLOG_ADMIN
+//    | BINLOG_ENCRYPTION_ADMIN | BIT | BIT_AND | BIT_OR | BIT_XOR | BLOCK | BOOL | BOOLEAN | BTREE | CACHE
+//    | CASCADED | CHAIN | CHANGED | CHANNEL | CHECKSUM | PAGE_CHECKSUM | CATALOG_NAME | CIPHER | CLASS_ORIGIN | CLIENT
+//    | CLONE_ADMIN | CLOSE | COALESCE | CODE | COLUMNS | COLUMN_FORMAT | COLUMN_NAME | COMMENT | COMMIT | COMPACT
+//    | COMPLETION | COMPRESSED | COMPRESSION | CONCURRENT | CONNECT | CONNECTION | CONNECTION_ADMIN | CONSISTENT
+//    | CONSTRAINT_CATALOG | CONSTRAINT_NAME | CONSTRAINT_SCHEMA | CONTAINS | CONTEXT | CONTRIBUTORS | COPY | COUNT
+//    | CPU | CURRENT | CURSOR_NAME | DATA | DATAFILE | DEALLOCATE | DEFAULT_AUTH | DEFINER | DELAY_KEY_WRITE
+//    | DES_KEY_FILE | DIAGNOSTICS | DIRECTORY | DISABLE | DISCARD | DISK | DO | DUMPFILE | DUPLICATE | DYNAMIC
+//    | ENABLE | ENCRYPTION | ENCRYPTION_KEY_ADMIN | END | ENDS | ENGINE | ENGINES | ERROR | ERRORS | ESCAPE | EUR
+//    | EVEN | EVENT | EVENTS | EVERY | EXCEPT | EXCHANGE | EXCLUSIVE | EXPIRE | EXPORT | EXTENDED | EXTENT_SIZE | FAST
+//    | FAULTS | FIELDS | FILE_BLOCK_SIZE | FILTER | FIREWALL_ADMIN | FIREWALL_USER | FIRST | FIXED | FLUSH | FOLLOWS
+//    | FOUND | FULL | FUNCTION | GENERAL | GLOBAL | GRANTS | GROUP | GROUP_CONCAT | GROUP_REPLICATION
+//    | GROUP_REPLICATION_ADMIN | HANDLER | HASH | HELP | HOST | HOSTS | IDENTIFIED | IGNORE_SERVER_IDS | IMPORT
+//    | INDEXES | INITIAL_SIZE | INNODB_REDO_LOG_ARCHIVE | INPLACE | INSERT_METHOD | INSTALL | INSTANCE | INTERNAL
+//    | INVOKER | IO | IO_THREAD | IPC | ISO | ISOLATION | ISSUER | JIS | JSON | KEY_BLOCK_SIZE | LANGUAGE | LAST
+//    | LEAVES | LESS | LEVEL | LIST | LOCAL | LOGFILE | LOGS | MASTER | MASTER_AUTO_POSITION | MASTER_CONNECT_RETRY
+//    | MASTER_DELAY | MASTER_HEARTBEAT_PERIOD | MASTER_HOST | MASTER_LOG_FILE | MASTER_LOG_POS | MASTER_PASSWORD
+//    | MASTER_PORT | MASTER_RETRY_COUNT | MASTER_SSL | MASTER_SSL_CA | MASTER_SSL_CAPATH | MASTER_SSL_CERT
+//    | MASTER_SSL_CIPHER | MASTER_SSL_CRL | MASTER_SSL_CRLPATH | MASTER_SSL_KEY | MASTER_TLS_VERSION | MASTER_USER
+//    | MAX_CONNECTIONS_PER_HOUR | MAX_QUERIES_PER_HOUR | MAX | MAX_ROWS | MAX_SIZE | MAX_UPDATES_PER_HOUR
+//    | MAX_USER_CONNECTIONS | MEDIUM | MEMBER | MEMORY | MERGE | MESSAGE_TEXT | MID | MIGRATE | MIN | MIN_ROWS
+//    | MODE | MODIFY | MUTEX | MYSQL | MYSQL_ERRNO | NAME | NAMES | NCHAR | NDB_STORED_USER | NEVER | NEXT | NO
+//    | NODEGROUP | NONE | NUMBER | OFFLINE | ODBC | OFFSET | OF | OJ | OLD_PASSWORD | ONE | ONLINE | ONLY | OPEN
+//    | OPTIMIZER_COSTS  | OPTIONS | ORDER | OWNER | PACK_KEYS | PAGE | PARSER | PARTIAL | PARTITIONING | PARTITIONS
+//    | PASSWORD | PERSIST_RO_VARIABLES_ADMIN | PHASE | PLUGINS | PLUGIN_DIR | PLUGIN | PORT | PRECEDES | PREPARE
+//    | PRESERVE | PREV | PROCESSLIST | PROFILE | PROFILES | PROXY | QUERY | QUICK | REBUILD | RECOVER
+//    | REDO_BUFFER_SIZE | REDUNDANT | RELAY | RELAYLOG | RELAY_LOG_FILE | RELAY_LOG_POS | REMOVE | REORGANIZE
+//    | REPAIR | REPLICATE_DO_DB | REPLICATE_DO_TABLE | REPLICATE_IGNORE_DB | REPLICATE_IGNORE_TABLE
+//    | REPLICATE_REWRITE_DB | REPLICATE_WILD_DO_TABLE | REPLICATE_WILD_IGNORE_TABLE | REPLICATION | REPLICATION_APPLIER
+//    | REPLICATION_SLAVE_ADMIN | RESET | RESOURCE_GROUP_ADMIN | RESOURCE_GROUP_USER | RESUME | RETURNED_SQLSTATE
+//    | RETURNS | ROLE | ROLE_ADMIN | ROLLBACK | ROLLUP | ROTATE | ROW | ROWS | ROW_FORMAT | SAVEPOINT | SCHEDULE
+//    | SCHEMA_NAME | SECURITY | SERIAL | SERVER | SESSION | SESSION_VARIABLES_ADMIN | SET_USER_ID | SHARE | SHARED
+//    | SHOW_ROUTINE | SIGNED | SIMPLE | SLAVE | SLOW | SNAPSHOT | SOCKET | SOME | SONAME | SOUNDS | SOURCE
+//    | SQL_AFTER_GTIDS | SQL_AFTER_MTS_GAPS | SQL_BEFORE_GTIDS | SQL_BUFFER_RESULT | SQL_CACHE | SQL_NO_CACHE
+//    | SQL_THREAD | STACKED | START | STARTS | STATS_AUTO_RECALC | STATS_PERSISTENT | STATS_SAMPLE_PAGES | STATUS
+//    | STD | STDDEV | STDDEV_POP | STDDEV_SAMP | STOP | STORAGE | STRING | SUBCLASS_ORIGIN | SUBJECT | SUBPARTITION
+//    | SUBPARTITIONS | SUM | SUSPEND | SWAPS | SWITCHES | SYSTEM_VARIABLES_ADMIN | TABLE_NAME | TABLESPACE
+//    | TABLE_ENCRYPTION_ADMIN | TEMPORARY | TEMPTABLE | THAN | TRADITIONAL | TRANSACTION | TRANSACTIONAL | TRIGGERS
+//    | TRUNCATE | UNDEFINED | UNDOFILE | UNDO_BUFFER_SIZE | UNINSTALL | UNKNOWN | UNTIL | UPGRADE | USA | USER
+//    | USE_FRM | USER_RESOURCES | VALIDATION | VALUE | VAR_POP | VAR_SAMP | VARIABLES | VARIANCE | VERSION_TOKEN_ADMIN
+//    | VIEW | WAIT | WARNINGS | WITHOUT | WORK | WRAPPER | X509 | XA | XA_RECOVER_ADMIN | XML | SPOKEN_DOT
+//    ;
 
 functionNameBase
     : ABS | ACOS | ADDDATE | ADDTIME | AES_DECRYPT | AES_ENCRYPT | AREA | ASBINARY | ASIN | ASTEXT | ASWKB | ASWKT
@@ -206,12 +207,7 @@ functionNameBase
     | TIMESTAMPADD | TIMESTAMPDIFF | TIME_FORMAT | TIME_TO_SEC | TOUCHES | TO_BASE64 | TO_DAYS | TO_SECONDS | UCASE
     | UNCOMPRESS | UNCOMPRESSED_LENGTH | UNHEX | UNIX_TIMESTAMP | UPDATEXML | UPPER | UUID | UUID_SHORT
     | VALIDATE_PASSWORD_STRENGTH | VERSION | VISIBLE | WAIT_UNTIL_SQL_THREAD_AFTER_GTIDS | WEEK | WEEKDAY | WEEKOFYEAR
-    | WEIGHT_STRING | WITHIN | YEAR | YEARWEEK | Y_FUNCTION | X_FUNCTION | JSON_ARRAY | JSON_OBJECT | JSON_QUOTE
-    | JSON_CONTAINS | JSON_CONTAINS_PATH | JSON_EXTRACT | JSON_KEYS | JSON_OVERLAPS | JSON_SEARCH | JSON_VALUE
-    | JSON_ARRAY_APPEND | JSON_ARRAY_INSERT | JSON_INSERT | JSON_MERGE | JSON_MERGE_PATCH | JSON_MERGE_PRESERVE
-    | JSON_REMOVE | JSON_REPLACE | JSON_SET | JSON_UNQUOTE | JSON_DEPTH | JSON_LENGTH | JSON_TYPE | JSON_VALID
-    | JSON_TABLE | JSON_SCHEMA_VALID | JSON_SCHEMA_VALIDATION_REPORT | JSON_PRETTY | JSON_STORAGE_FREE
-    | JSON_STORAGE_SIZE | JSON_ARRAYAGG | JSON_OBJECTAGG
+    | WEIGHT_STRING | WITHIN | YEAR | YEARWEEK | Y_FUNCTION | X_FUNCTION
     ;
 
 selectElementDot //SPEAKQL FEATURE: '.' synonym is the word DOT
@@ -232,43 +228,41 @@ selectElementAs
     ;
 
 functionCall
-    : specificFunction                                          #specificFunctionCall
-    | aggregateWindowedFunction                                 #aggregateFunctionCall
+    : aggregateWindowedFunction                                 #aggregateFunctionCall
     | nonAggregateWindowedFunction                              #nonAggregateFunctionCall
     | scalarFunctionName leftParen functionArgs? rightParen     #scalarFunctionCall
     | fullId leftParen functionArgs? rightParen                 #udfFunctionCall
-    | passwordFunctionClause                                    #passwordFunctionCall
     ;
 
-specificFunction
-    : ( CURRENT_DATE | CURRENT_TIME | CURRENT_TIMESTAMP | CURRENT_USER | LOCALTIME )
-        (leftParen rightParen)?                                                                     #simpleFunctionCall
-    | CONVERT leftParen expression separator=',' convertedDataType rightParen                       #dataTypeFunctionCall
-    | CONVERT leftParen expression USING charsetName rightParen                                     #dataTypeFunctionCall
-    | CAST leftParen expression AS convertedDataType rightParen                                     #dataTypeFunctionCall
-    | VALUES leftParen fullColumnName rightParen                                                    #valuesFunctionCall
-    | CASE expression caseFuncAlternative+ (ELSE elseArg=functionArg)? END                          #caseExpressionFunctionCall
-    | CASE caseFuncAlternative+ (ELSE elseArg=functionArg)? END                                     #caseFunctionCall
-    | CHAR leftParen functionArgs (USING charsetName)? rightParen                                   #charFunctionCall
-    | POSITION leftParen ( positionString=stringLiteral | positionExpression=expression ) IN
-        ( inString=stringLiteral | inExpression=expression ) rightParen                             #positionFunctionCall
-    | (SUBSTR | SUBSTRING) leftParen ( sourceString=stringLiteral | sourceExpression=expression )
-        FROM ( fromDecimal=decimalLiteral | fromExpression=expression )
-        ( FOR ( forDecimal=decimalLiteral | forExpression=expression ) )? rightParen                #substrFunctionCall
-    | TRIM leftParen positioinForm=(BOTH | LEADING | TRAILING)
-        ( sourceString=stringLiteral | sourceExpression=expression )?
-        FROM ( fromString=stringLiteral | fromExpression=expression ) rightParen                    #trimFunctionCall
-    | TRIM leftParen ( sourceString=stringLiteral | sourceExpression=expression )
-        FROM ( fromString=stringLiteral | fromExpression=expression ) rightParen                    #trimFunctionCall
-    | WEIGHT_STRING leftParen (stringLiteral | expression) (AS stringFormat=(CHAR | BINARY)
-        leftParen decimalLiteral rightParen )? levelsInWeightString? rightParen                     #weightFunctionCall
-    | EXTRACT leftParen intervalType FROM
-        ( sourceString=stringLiteral | sourceExpression=expression ) rightParen                     #extractFunctionCall
-    | GET_FORMAT leftParen datetimeFormat=(DATE | TIME | DATETIME) ',' stringLiteral rightParen     #getFormatFunctionCall
-    | JSON_VALUE leftParen expression ',' expression (RETURNING convertedDataType)?
-        ((NULL_LITERAL | ERROR | (DEFAULT defaultValue)) ON EMPTY)?
-        ((NULL_LITERAL | ERROR | (DEFAULT defaultValue)) ON ERROR)? rightParen                      #jsonValueFunctionCall
-    ;
+//specificFunction
+//    : ( CURRENT_DATE | CURRENT_TIME | CURRENT_TIMESTAMP | CURRENT_USER | LOCALTIME )
+//        (leftParen rightParen)?                                                                     #simpleFunctionCall
+//    | CONVERT leftParen expression separator=',' convertedDataType rightParen                       #dataTypeFunctionCall
+//    | CONVERT leftParen expression USING charsetName rightParen                                     #dataTypeFunctionCall
+//    | CAST leftParen expression AS convertedDataType rightParen                                     #dataTypeFunctionCall
+//    | VALUES leftParen fullColumnName rightParen                                                    #valuesFunctionCall
+//    | CASE expression caseFuncAlternative+ (ELSE elseArg=functionArg)? END                          #caseExpressionFunctionCall
+//    | CASE caseFuncAlternative+ (ELSE elseArg=functionArg)? END                                     #caseFunctionCall
+//    | CHAR leftParen functionArgs (USING charsetName)? rightParen                                   #charFunctionCall
+//    | POSITION leftParen ( positionString=stringLiteral | positionExpression=expression ) IN
+//        ( inString=stringLiteral | inExpression=expression ) rightParen                             #positionFunctionCall
+//    | (SUBSTR | SUBSTRING) leftParen ( sourceString=stringLiteral | sourceExpression=expression )
+//        FROM ( fromDecimal=decimalLiteral | fromExpression=expression )
+//        ( FOR ( forDecimal=decimalLiteral | forExpression=expression ) )? rightParen                #substrFunctionCall
+//    | TRIM leftParen positioinForm=(BOTH | LEADING | TRAILING)
+//        ( sourceString=stringLiteral | sourceExpression=expression )?
+//        FROM ( fromString=stringLiteral | fromExpression=expression ) rightParen                    #trimFunctionCall
+//    | TRIM leftParen ( sourceString=stringLiteral | sourceExpression=expression )
+//        FROM ( fromString=stringLiteral | fromExpression=expression ) rightParen                    #trimFunctionCall
+//    | WEIGHT_STRING leftParen (stringLiteral | expression) (AS stringFormat=(CHAR | BINARY)
+//        leftParen decimalLiteral rightParen )? levelsInWeightString? rightParen                     #weightFunctionCall
+//    | EXTRACT leftParen intervalType FROM
+//        ( sourceString=stringLiteral | sourceExpression=expression ) rightParen                     #extractFunctionCall
+//    | GET_FORMAT leftParen datetimeFormat=(DATE | TIME | DATETIME) ',' stringLiteral rightParen     #getFormatFunctionCall
+//    | JSON_VALUE leftParen expression ',' expression (RETURNING convertedDataType)?
+//        ((NULL_LITERAL | ERROR | (DEFAULT defaultValue)) ON EMPTY)?
+//        ((NULL_LITERAL | ERROR | (DEFAULT defaultValue)) ON ERROR)? rightParen                      #jsonValueFunctionCall
+//    ;
 
 leftParen //SPEAKQL MOD: Added because ANTLR provides the tree as a lisp tree, so this is needed to differentiate between lisp tree parens and query parens
     : '(' | OPEN_PAREN | LEFT_PAREN | OPEN_PARENTHESIS | LEFT_PARENTHESIS
@@ -312,7 +306,7 @@ expressionDelimiter //SPEAKQL FEATURE: delimiter between partitioned simple quer
 
 selectModifierExpression //SPEAKQL FEATURE: enables reordering by including optional statements in a single expression
     : groupByClause? havingClause? windowClause? orderByClause? limitClause?
-    | groupByClause? havingClause? windowClause? orderByClause? limitClause? selectIntoExpression?
+    //| groupByClause? havingClause? windowClause? orderByClause? limitClause? selectIntoExpression?
     ;
 
 groupByClause //SPEAKQL FEATURE: Added aggregate function option to end of group by clause to enable table-spanning aggregation using the simple query partitioning feature
@@ -407,42 +401,42 @@ limitClauseAtom
     : decimalLiteral | mysqlVariable | simpleId
     ;
 
-selectIntoExpression
-    : INTO assignmentField (',' assignmentField )*                                          #selectIntoVariables
-    | INTO DUMPFILE STRING_LITERAL                                                          #selectIntoDumpFile
-    | ( INTO OUTFILE filename=STRING_LITERAL (CHARACTER SET charset=charsetName)?
-        ( fieldsFormat=(FIELDS | COLUMNS)
-        selectFieldsInto+ )? ( LINES selectLinesInto+ )? )                                  #selectIntoTextFile
-    ;
+//selectIntoExpression
+//    : INTO assignmentField (',' assignmentField )*                                          #selectIntoVariables
+//    | INTO DUMPFILE STRING_LITERAL                                                          #selectIntoDumpFile
+//    | ( INTO OUTFILE filename=STRING_LITERAL (CHARACTER SET charset=charsetName)?
+//        ( fieldsFormat=(FIELDS | COLUMNS)
+//        selectFieldsInto+ )? ( LINES selectLinesInto+ )? )                                  #selectIntoTextFile
+//    ;
 
-assignmentField
-    : uid | LOCAL_ID
-    ;
+//assignmentField
+//    : uid | LOCAL_ID
+//    ;
+//
+//selectFieldsInto
+//    : TERMINATED BY terminationField=STRING_LITERAL
+//    | OPTIONALLY? ENCLOSED BY enclosion=STRING_LITERAL
+//    | ESCAPED BY escaping=STRING_LITERAL
+//    ;
+//
+//selectLinesInto
+//    : STARTING BY starting=STRING_LITERAL
+//    | TERMINATED BY terminationLine=STRING_LITERAL
+//    ;
 
-selectFieldsInto
-    : TERMINATED BY terminationField=STRING_LITERAL
-    | OPTIONALLY? ENCLOSED BY enclosion=STRING_LITERAL
-    | ESCAPED BY escaping=STRING_LITERAL
-    ;
-
-selectLinesInto
-    : STARTING BY starting=STRING_LITERAL
-    | TERMINATED BY terminationLine=STRING_LITERAL
-    ;
-
-lockClause
-    : FOR UPDATE | LOCK IN SHARE MODE
-    ;
+//lockClause
+//    : FOR UPDATE | LOCK IN SHARE MODE
+//    ;
 
 queryExpression
     : leftParen querySpecification rightParen
     | leftParen queryExpression rightParen
     ;
 
-querySpecificationNointo
-    : selectKeyword selectSpec* selectElements fromClause? groupByClause? havingClause?
-        windowClause? orderByClause? limitClause?
-    ;
+//querySpecificationNointo
+//    : selectKeyword selectSpec* selectElements fromClause? groupByClause? havingClause?
+//        windowClause? orderByClause? limitClause?
+//    ;
 
 fromClauseNoJoin //SPEAKQL FEATURE: This is the from clause used by the simple query partition. If a query has a query expression delimiter, then this rule is used.
     : fromKeyword tableSourceNoJoin
@@ -582,18 +576,18 @@ tableSourceDelimiter //SPEAKQL FEATURE: Added ',' synonym for more natural langu
     : ',' | AND
     ;
 
-unionStatement
-    : UNION unionType=(ALL | DISTINCT)? (querySpecificationNointo | queryExpressionNointo)
-    ;
-
-queryExpressionNointo
-    : leftParen querySpecificationNointo rightParen
-    | leftParen queryExpressionNointo rightParen
-    ;
-
-unionParenthesis
-    : UNION unionType=(ALL | DISTINCT)? queryExpressionNointo
-    ;
+//unionStatement
+//    : UNION unionType=(ALL | DISTINCT)? (querySpecificationNointo | queryExpressionNointo)
+//    ;
+//
+//queryExpressionNointo
+//    : leftParen querySpecificationNointo rightParen
+//    | leftParen queryExpressionNointo rightParen
+//    ;
+//
+//unionParenthesis
+//    : UNION unionType=(ALL | DISTINCT)? queryExpressionNointo
+//    ;
 
 expressions
     : expression (',' expression)*
@@ -611,18 +605,18 @@ expressionAtom
     : constant                                                                      #constantExpressionAtom
     | fullColumnName                                                                #fullColumnNameExpressionAtom
     | functionCall                                                                  #functionCallExpressionAtom
-    | expressionAtom COLLATE collationName                                          #collateExpressionAtom
+//    | expressionAtom COLLATE collationName                                          #collateExpressionAtom
     | mysqlVariable                                                                 #mysqlVariableExpressionAtom
     | unaryOperator expressionAtom                                                  #unaryExpressionAtom
-    | BINARY expressionAtom                                                         #binaryExpressionAtom
+//    | BINARY expressionAtom                                                         #binaryExpressionAtom
     | leftParen expression (',' expression)* rightParen                             #nestedExpressionAtom
     | ROW leftParen expression (',' expression)+ rightParen                         #nestedRowExpressionAtom
     | EXISTS leftParen selectStatement rightParen                                   #existsExpressionAtom
     | leftParen selectStatement rightParen                                          #subqueryExpressionAtom
-    | INTERVAL expression intervalType                                              #intervalExpressionAtom
-    | left=expressionAtom bitOperator right=expressionAtom                          #bitExpressionAtom
+//    | INTERVAL expression intervalType                                              #intervalExpressionAtom
+//    | left=expressionAtom bitOperator right=expressionAtom                          #bitExpressionAtom
     | left=expressionAtom mathOperator right=expressionAtom                         #mathExpressionAtom
-    | left=expressionAtom jsonOperator right=expressionAtom                         #jsonExpressionAtom
+//    | left=expressionAtom jsonOperator right=expressionAtom                         #jsonExpressionAtom
     ;
 
 constant
@@ -661,70 +655,70 @@ unaryOperator
     : '!' | '~' | '+' | '-' | NOT
     ;
 
-intervalType
-    : intervalTypeBase | YEAR | YEAR_MONTH | DAY_HOUR | DAY_MINUTE | DAY_SECOND | HOUR_MINUTE
-    | HOUR_SECOND | MINUTE_SECOND | SECOND_MICROSECOND | MINUTE_MICROSECOND
-    | HOUR_MICROSECOND | DAY_MICROSECOND
-    ;
+//intervalType
+//    : intervalTypeBase | YEAR | YEAR_MONTH | DAY_HOUR | DAY_MINUTE | DAY_SECOND | HOUR_MINUTE
+//    | HOUR_SECOND | MINUTE_SECOND | SECOND_MICROSECOND | MINUTE_MICROSECOND
+//    | HOUR_MICROSECOND | DAY_MICROSECOND
+//    ;
 
-bitOperator
-    : '<' '<' | '>' '>' | '&' | '^' | '|'
-    ;
+//bitOperator
+//    : '<' '<' | '>' '>' | '&' | '^' | '|'
+//    ;
 
 mathOperator
     : '*' | '/' | '%' | DIV | MOD | '+' | '-'
     ;
 
-jsonOperator
-    : '-' '>' | '-' '>' '>'
-    ;
+//jsonOperator
+//    : '-' '>' | '-' '>' '>'
+//    ;
 
-convertedDataType
-    : typeName=(BINARY| NCHAR) lengthOneDimension?
-    | typeName=CHAR lengthOneDimension? ((CHARACTER SET | CHARSET) charsetName)?
-    | typeName=(DATE | DATETIME | TIME | JSON) | typeName=DECIMAL lengthTwoDimension?
-    | (SIGNED | UNSIGNED) INTEGER? | UNSIGNED ARRAY
-    ;
+//convertedDataType
+//    : typeName=(BINARY| NCHAR) lengthOneDimension?
+//    | typeName=CHAR lengthOneDimension? ((CHARACTER SET | CHARSET) charsetName)?
+//    | typeName=(DATE | DATETIME | TIME | JSON) | typeName=DECIMAL lengthTwoDimension?
+//    | (SIGNED | UNSIGNED) INTEGER? | UNSIGNED ARRAY
+//    ;
 
-lengthOneDimension
-    : leftParen decimalLiteral rightParen
-    ;
+//lengthOneDimension
+//    : leftParen decimalLiteral rightParen
+//    ;
 
-charsetName
-    : BINARY | charsetNameBase | STRING_LITERAL | CHARSET_REVERSE_QOUTE_STRING
-    ;
+//charsetName
+//    : BINARY | charsetNameBase | STRING_LITERAL | CHARSET_REVERSE_QOUTE_STRING
+//    ;
 
-lengthTwoDimension
-    : leftParen decimalLiteral ',' decimalLiteral rightParen
-    ;
+//lengthTwoDimension
+//    : leftParen decimalLiteral ',' decimalLiteral rightParen
+//    ;
 
-caseFuncAlternative
-    : WHEN condition=functionArg THEN consequent=functionArg
-    ;
+//caseFuncAlternative
+//    : WHEN condition=functionArg THEN consequent=functionArg
+//    ;
 
 functionArgs
     : (constant | fullColumnName | functionCall | expression)
         ( ',' (constant | fullColumnName | functionCall | expression) )*
     ;
 
-levelsInWeightString
-    : LEVEL levelInWeightListElement (',' levelInWeightListElement)*                #levelWeightList
-    | LEVEL firstLevel=decimalLiteral '-' lastLevel=decimalLiteral                  #levelWeightRange
-    ;
+//levelsInWeightString
+//    : LEVEL levelInWeightListElement (',' levelInWeightListElement)*                #levelWeightList
+//    | LEVEL firstLevel=decimalLiteral '-' lastLevel=decimalLiteral                  #levelWeightRange
+//    ;
 
-levelInWeightListElement
-    : decimalLiteral orderType=(ASC | DESC | REVERSE)?
-    ;
+//levelInWeightListElement
+//    : decimalLiteral orderType=(ASC | DESC | REVERSE)?
+//    ;
 
-defaultValue
-    : (NULL_LITERAL | unaryOperator? constant | currentTimestamp
-    | leftParen expression rightParen) (ON UPDATE currentTimestamp)?
-    ;
+//defaultValue
+//    : (NULL_LITERAL | unaryOperator? constant | currentTimestamp
+//    | leftParen expression rightParen) (ON UPDATE currentTimestamp)?
+//    ;
 
-currentTimestamp
-    : ( (CURRENT_TIMESTAMP | LOCALTIME | LOCALTIMESTAMP) (leftParen decimalLiteral? rightParen)?
-    | NOW leftParen decimalLiteral? rightParen )
-    ;
+//currentTimestamp
+//    : ( (CURRENT_TIMESTAMP | LOCALTIME | LOCALTIMESTAMP) (leftParen decimalLiteral? rightParen)?
+//    | NOW leftParen decimalLiteral? rightParen )
+//    ;
 
 aggregateWindowedFunction
     : theKeyword? (AVG | MAX | MIN | SUM) ofKeyword? leftParen aggregator=(ALL | DISTINCT)? functionArg rightParen overClause?
@@ -775,9 +769,9 @@ scalarFunctionName
     | REPLACE | SUBSTR | SUBSTRING | SYSDATE | TRIM | UTC_DATE | UTC_TIME | UTC_TIMESTAMP
     ;
 
-passwordFunctionClause
-    : functionName=(PASSWORD | OLD_PASSWORD) leftParen functionArg rightParen
-    ;
+//passwordFunctionClause
+//    : functionName=(PASSWORD | OLD_PASSWORD) leftParen functionArg rightParen
+//    ;
 
 selectElementDelimiter //SPEAKQL FEATURE: ',' synonym for select elements for more natural language
     : ',' | AND
