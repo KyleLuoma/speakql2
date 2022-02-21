@@ -13,7 +13,8 @@ selectStatement
 
 querySpecification
     : queryOrderSpecification selectModifierExpression                                        #singleQuerySpecification
-    | (multiJoinExpression expressionDelimiter)? multiQueryOrderSpecification
+    | (multiJoinExpression expressionDelimiter)? (selectModifierExpression expressionDelimiter)?
+        multiQueryOrderSpecification
         ( expressionDelimiter ( multiQueryOrderSpecification | multiJoinExpression) )*
         (expressionDelimiter selectModifierExpression)?                                       #multiQuerySpecification
     ;
@@ -250,7 +251,7 @@ limitClause
     ;
 
 limitClauseAtom
-    : decimalLiteral | mysqlVariable | simpleId
+    : decimalLiteral | simpleId
     ;
 
 
@@ -414,7 +415,6 @@ expressionAtom
     : constant                                                                      #constantExpressionAtom
     | fullColumnName                                                                #fullColumnNameExpressionAtom
     | functionCall                                                                  #functionCallExpressionAtom
-    | mysqlVariable                                                                 #mysqlVariableExpressionAtom
     | unaryOperator expressionAtom                                                  #unaryExpressionAtom
     | leftParen expression (',' expression)* rightParen                             #nestedExpressionAtom
     | ROW leftParen expression (',' expression)+ rightParen                         #nestedRowExpressionAtom
@@ -449,10 +449,6 @@ hexadecimalLiteral
 
 booleanLiteral
     : TRUE | FALSE
-    ;
-
-mysqlVariable
-    : LOCAL_ID | GLOBAL_ID
     ;
 
 unaryOperator
