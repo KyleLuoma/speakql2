@@ -70,7 +70,7 @@ selectElement
     : fullId selectElementDot '*'                                   #selectStarElement
     | fullColumnName (selectElementAs uid)?                         #selectColumnElement //SpeakQl constraint: column aliases MUST use the AS keyword
     | functionCall (selectElementAs uid)?                           #selectFunctionElement //SpeakQl constraint: function aliases MUST use the AS keyword
-    | (LOCAL_ID VAR_ASSIGN)? expression (selectElementAs uid)?     #selectExpressionElement
+    //| (LOCAL_ID VAR_ASSIGN)? expression (selectElementAs uid)?     #selectExpressionElement //SpeakQl constraint: no expression as select element
     ;
 
 fullId
@@ -151,17 +151,17 @@ selectElementAs
 
 functionCall
     : aggregateWindowedFunction                                 #aggregateFunctionCall
-    | nonAggregateWindowedFunction                              #nonAggregateFunctionCall
+    //| nonAggregateWindowedFunction                              #nonAggregateFunctionCall
     | scalarFunctionName leftParen functionArgs? rightParen     #scalarFunctionCall
-    | fullId leftParen functionArgs? rightParen                 #udfFunctionCall
+    //| fullId leftParen functionArgs? rightParen                 #udfFunctionCall
     ;
 
 leftParen //SPEAKQL MOD: Added because ANTLR provides the tree as a lisp tree, so this is needed to differentiate between lisp tree parens and query parens
-    : '(' | OPEN_PAREN | LEFT_PAREN | OPEN_PARENTHESIS | LEFT_PARENTHESIS
+    : '(' //| OPEN_PAREN | LEFT_PAREN | OPEN_PARENTHESIS | LEFT_PARENTHESIS
     ;
 
 rightParen
-    : ')' | CLOSE_PAREN | RIGHT_PAREN | CLOSE_PARENTHESIS | RIGHT_PARENTHESIS
+    : ')' //| CLOSE_PAREN | RIGHT_PAREN | CLOSE_PARENTHESIS | RIGHT_PARENTHESIS
     ;
 
 expression
@@ -292,10 +292,10 @@ tableSource
     ;
 
 tableSourceItem
-    : subQueryTable tableAlias                                                  #subqueryTableItem
-    | theKeyword? tableName tableKeyword?                                       #onlyTableNameItem
-    | tableName (PARTITION leftParen uidList rightParen )?
-        (tableAlias)? (indexHint (',' indexHint)* )?                            #atomTableItem
+    : theKeyword? tableName tableKeyword? tableAlias?                           #onlyTableNameItem
+    | subQueryTable tableAlias                                                  #subqueryTableItem
+//    | tableName (PARTITION leftParen uidList rightParen )?
+//        (tableAlias)? (indexHint (',' indexHint)* )?                            #atomTableItem
     | leftParen tableSources rightParen                                         #tableSourcesItem
     ;
 
@@ -462,8 +462,8 @@ mathOperator
 
 
 functionArgs
-    : (constant | fullColumnName | functionCall | expression)
-        ( ',' (constant | fullColumnName | functionCall | expression) )*
+    : (constant | fullColumnName)// | functionCall | expression)
+        ( ',' (constant | fullColumnName))*// | functionCall | expression) )*
     ;
 
 
@@ -471,10 +471,10 @@ aggregateWindowedFunction
     : theKeyword? (AVG | MAX | MIN | SUM) ofKeyword? leftParen aggregator=(ALL | DISTINCT)? functionArg rightParen
     | theKeyword? COUNT ofKeyword? leftParen (starArg='*' | allAggregatorKeyword? functionArg
         | distinctAggregatorKeyword functionArgs) rightParen
-    | ( BIT_AND | BIT_OR | BIT_XOR | STD | STDDEV | STDDEV_POP | STDDEV_SAMP | VAR_POP | VAR_SAMP | VARIANCE )
-        leftParen aggregator=ALL? functionArg rightParen
-    | GROUP_CONCAT leftParen aggregator=DISTINCT? functionArgs
-        (ORDER BY orderByExpression (',' orderByExpression)* )? (SEPARATOR separator=STRING_LITERAL)? rightParen
+//    | ( BIT_AND | BIT_OR | BIT_XOR | STD | STDDEV | STDDEV_POP | STDDEV_SAMP | VAR_POP | VAR_SAMP | VARIANCE )
+//        leftParen aggregator=ALL? functionArg rightParen
+//    | GROUP_CONCAT leftParen aggregator=DISTINCT? functionArgs
+//        (ORDER BY orderByExpression (',' orderByExpression)* )? (SEPARATOR separator=STRING_LITERAL)? rightParen
     ;
 
 //SpeakQl feature / syntactic sugar: OF and THE keywords to make speaking aggregate functions more natural
@@ -487,7 +487,7 @@ theKeyword
     ;
 
 functionArg
-    : constant | fullColumnName | functionCall | expression
+    : constant | fullColumnName //| functionCall | expression
     ;
 
 allAggregatorKeyword
@@ -498,13 +498,13 @@ distinctAggregatorKeyword
     : aggregator=DISTINCT
     ;
 
-nonAggregateWindowedFunction
-    : (LAG | LEAD) leftParen expression (',' decimalLiteral)? (',' decimalLiteral)? rightParen
-    | (FIRST_VALUE | LAST_VALUE) leftParen expression rightParen
-    | (CUME_DIST | DENSE_RANK | PERCENT_RANK | RANK | ROW_NUMBER) leftParen rightParen
-    | NTH_VALUE leftParen expression ',' decimalLiteral rightParen
-    | NTILE leftParen decimalLiteral rightParen
-    ;
+//nonAggregateWindowedFunction
+//    : (LAG | LEAD) leftParen expression (',' decimalLiteral)? (',' decimalLiteral)? rightParen
+//    | (FIRST_VALUE | LAST_VALUE) leftParen expression rightParen
+//    | (CUME_DIST | DENSE_RANK | PERCENT_RANK | RANK | ROW_NUMBER) leftParen rightParen
+//    | NTH_VALUE leftParen expression ',' decimalLiteral rightParen
+//    | NTILE leftParen decimalLiteral rightParen
+//    ;
 
 scalarFunctionName
     : CURDATE | CURRENT_DATE | CURRENT_TIME | CURRENT_TIMESTAMP
