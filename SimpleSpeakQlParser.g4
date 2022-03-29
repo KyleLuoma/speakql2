@@ -74,7 +74,7 @@ selectElement
     ;
 
 fullId
-    : uid (DOT_ID | '.' uid)?
+    : uid ('.' uid)?
     ;
 
 uid
@@ -142,7 +142,7 @@ fullColumnName
     ;
 
 dottedId
-    : DOT_ID | selectElementDot uid
+    : selectElementDot uid
     ;
 
 selectElementAs
@@ -165,8 +165,7 @@ rightParen
     ;
 
 expression
-    : notOperator=(NOT | '!') expression                    #notExpression
-    | expression logicalOperator expression                 #logicalExpression
+    : notOperator=(NOT | '!') predicate                    #notExpression
     | predicate IS NOT? testValue=(TRUE | FALSE | UNKNOWN)  #isExpression
     | predicate                                             #predicateExpression
     ;
@@ -176,16 +175,17 @@ logicalOperator
     ;
 
 predicate //SpeakQL Feature: Optional 'IS' in in predicate
-    : predicate NOT? isKeyword? IN leftParen (selectStatement | expressions) rightParen                 #inPredicate
-    | predicate IS nullNotnull                                                                          #isNullPredicate
-    | left=predicate comparisonOperator right=predicate                                                 #binaryComparisonPredicate
-    | predicate comparisonOperator quantifier=(ALL | ANY | SOME) leftParen selectStatement rightParen   #subqueryComparisonPredicate
-    | predicate NOT? BETWEEN predicate AND predicate                                                    #betweenPredicate
-    | predicate SOUNDS LIKE predicate                                                                   #soundsLikePredicate
-    | predicate NOT? LIKE predicate (ESCAPE STRING_LITERAL)?                                            #likePredicate
-    | predicate NOT? regex=(REGEXP | RLIKE) predicate                                                   #regexpPredicate
-    | (LOCAL_ID VAR_ASSIGN)? expressionAtom                                                             #expressionAtomPredicate
-    | predicate MEMBER OF leftParen predicate rightParen                                                #jsonMemberOfPredicate
+    //: predicate NOT? isKeyword? IN leftParen (selectStatement | expressions) rightParen                 #inPredicate
+    : simpleExpressionAtom IS nullNotnull                                                                 #isNullPredicate
+    | left=simpleExpressionAtom comparisonOperator right=simpleExpressionAtom                             #binaryComparisonPredicate
+    //| predicate comparisonOperator quantifier=(ALL | ANY | SOME) leftParen selectStatement rightParen   #subqueryComparisonPredicate
+    //| simpleExpressionAtom NOT? BETWEEN simpleExpressionAtom AND simpleExpressionAtom                     #betweenPredicate
+    //| predicate SOUNDS LIKE predicate                                                                   #soundsLikePredicate
+    //| simpleExpressionAtom NOT? LIKE simpleExpressionAtom (ESCAPE STRING_LITERAL)?                        #likePredicate
+    //| predicate NOT? regex=(REGEXP | RLIKE) predicate                                                   #regexpPredicate
+    //| (LOCAL_ID VAR_ASSIGN)? expressionAtom                                                             #expressionAtomPredicate
+    | simpleExpressionAtom                                                                                #simpleExpressionAtomPredicate
+    //| predicate MEMBER OF leftParen predicate rightParen                                                #jsonMemberOfPredicate
     ;
 
 isKeyword
@@ -292,7 +292,7 @@ tableSource
     ;
 
 tableSourceItem
-    : theKeyword? tableName tableKeyword? tableAlias?                           #onlyTableNameItem
+    : tableName tableAlias?                            #onlyTableNameItem
     | subQueryTable tableAlias                                                  #subqueryTableItem
 //    | tableName (PARTITION leftParen uidList rightParen )?
 //        (tableAlias)? (indexHint (',' indexHint)* )?                            #atomTableItem
@@ -400,7 +400,11 @@ tableSourceDelimiter //SPEAKQL FEATURE: Added ',' synonym for more natural langu
     ;
 
 expressions
-    : expression (',' expression)*
+    : expression (whereExpressionDelimiter expression)*
+    ;
+
+whereExpressionDelimiter
+    : ',' | AND
     ;
 
 nullNotnull
@@ -411,17 +415,27 @@ comparisonOperator
     : '=' | '>' | '<' | '<' '=' | '>' '=' | '<' '>' | '!' '=' | '<' '=' '>'
     ;
 
-expressionAtom
-    : constant                                                                      #constantExpressionAtom
-    | fullColumnName                                                                #fullColumnNameExpressionAtom
-    | functionCall                                                                  #functionCallExpressionAtom
-    | unaryOperator expressionAtom                                                  #unaryExpressionAtom
-    | leftParen expression (',' expression)* rightParen                             #nestedExpressionAtom
-    | ROW leftParen expression (',' expression)+ rightParen                         #nestedRowExpressionAtom
-    | EXISTS leftParen selectStatement rightParen                                   #existsExpressionAtom
-    | leftParen selectStatement rightParen                                          #subqueryExpressionAtom
-    | left=expressionAtom mathOperator right=expressionAtom                         #mathExpressionAtom
+simpleExpressionAtom //SpeakQl constraint: Removing subqueries and exists among other recursive expressions to enable faster ASR
+    : constant
+    | fullColumnName
+    | fullColumnName mathOperator fullColumnName
+    | fullColumnName mathOperator constant
+    | constant mathOperator fullColumnName
+    | constant mathOperator constant
+    | unaryOperator (constant | fullColumnName)
     ;
+
+//expressionAtom
+//    : constant                                                                      #constantExpressionAtom
+//    | fullColumnName                                                                #fullColumnNameExpressionAtom
+//    | functionCall                                                                  #functionCallExpressionAtom
+//    | unaryOperator expressionAtom                                                  #unaryExpressionAtom
+//    | leftParen expression (',' expression)* rightParen                             #nestedExpressionAtom
+//    | ROW leftParen expression (',' expression)+ rightParen                         #nestedRowExpressionAtom
+//    | EXISTS leftParen selectStatement rightParen                                   #existsExpressionAtom
+//    | leftParen selectStatement rightParen                                          #subqueryExpressionAtom
+//    | left=expressionAtom mathOperator right=expressionAtom                         #mathExpressionAtom
+//    ;
 
 constant
     : stringLiteral | decimalLiteral | '-' decimalLiteral | hexadecimalLiteral | booleanLiteral
@@ -525,7 +539,7 @@ whereKeyword
     : WHERE ;
 
 whereExpression
-    : whereExpr=expression
+    : expression (logicalOperator expression)*
     ;
 
 tableExpressionNoJoin
