@@ -196,9 +196,14 @@ expressionDelimiter //SPEAKQL FEATURE: delimiter between partitioned simple quer
     : AND_THEN | THEN
     ;
 
-selectModifierExpression //SPEAKQL FEATURE: enables reordering by including optional statements in a single expression
-    : groupByClause? havingClause? orderByClause? limitClause?
+selectModifierExpression //SPEAKQL FEATURE: enables reordering by adding an additional selectModifierItem layer
+                         //                 with every modifier item as an option
+    : selectModifierItem? selectModifierItem? selectModifierItem? selectModifierItem?
     //| groupByClause? havingClause? windowClause? orderByClause? limitClause? selectIntoExpression?
+    ;
+
+selectModifierItem
+    : groupByClause | havingClause | orderByClause | limitClause
     ;
 
 groupByClause //SPEAKQL FEATURE: Added aggregate function option to end of group by clause to enable table-spanning aggregation using the simple query partitioning feature
