@@ -221,7 +221,7 @@ groupByKeyword
     ;
 
 groupByItem
-    : groupByExpression order=(ASC | DESC)?
+    : groupByExpression order
     | automaticGroupByKeyword
     ;
 
@@ -252,7 +252,20 @@ orderByClause
     ;
 
 orderByExpression
-    : expression order=(ASC | DESC)?
+    : expression order?
+    ;
+
+//Speakq feature: full word ascending and descending
+order
+    : ascendingKeyword | descendingKeyword
+    ;
+
+ascendingKeyword
+    : ASC | ASCENDING
+    ;
+
+descendingKeyword
+    : DESC | DESCENDING
     ;
 
 limitClause

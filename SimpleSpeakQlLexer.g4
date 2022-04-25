@@ -95,6 +95,9 @@ RIGHT_PAREN:                        'RIGHT PAREN';
 
 THE:                                'THE';
 
+ASCENDING:                          'ASCENDING';
+DESCENDING:                         'DESCENDING';
+
 // Common Keywords
 
 ADD:                                 'ADD';
