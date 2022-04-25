@@ -71,6 +71,8 @@ WITH_TABLE:                         'WITH TABLE';
 SPOKEN_DOT:                         'DOT';
 
 AND_THEN:                           'AND THEN';
+NEXT:                               'NEXT';
+AVERAGE:                            'AVERAGE';
 
 SUBQUERY:                           'SUBQUERY';
 

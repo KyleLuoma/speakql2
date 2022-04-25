@@ -151,6 +151,7 @@ selectElementAs
 
 functionCall
     : aggregateWindowedFunction                                 #aggregateFunctionCall
+    | noParenAggregateWindowedFunction                          #noParenAggregateFunctionCall
     | nonAggregateWindowedFunction                              #nonAggregateFunctionCall
     | scalarFunctionName leftParen functionArgs? rightParen     #scalarFunctionCall
     | fullId leftParen functionArgs? rightParen                 #udfFunctionCall
@@ -176,10 +177,10 @@ logicalOperator
     ;
 
 predicate //SpeakQL Feature: Optional 'IS' in in predicate
-    : predicate NOT? isKeyword? IN leftParen (selectStatement | expressions) rightParen                 #inPredicate
+    : predicate NOT? isKeyword? IN leftParen (subQueryPredicate | expressions) rightParen                 #inPredicate
     | predicate IS nullNotnull                                                                          #isNullPredicate
     | left=predicate comparisonOperator right=predicate                                                 #binaryComparisonPredicate
-    | predicate comparisonOperator quantifier=(ALL | ANY | SOME) leftParen selectStatement rightParen   #subqueryComparisonPredicate
+    | predicate comparisonOperator quantifier=(ALL | ANY | SOME) leftParen subQueryPredicate rightParen   #subqueryComparisonPredicate
     | predicate NOT? BETWEEN predicate AND predicate                                                    #betweenPredicate
     | predicate SOUNDS LIKE predicate                                                                   #soundsLikePredicate
     | predicate NOT? LIKE predicate (ESCAPE STRING_LITERAL)?                                            #likePredicate
@@ -188,12 +189,16 @@ predicate //SpeakQL Feature: Optional 'IS' in in predicate
     | predicate MEMBER OF leftParen predicate rightParen                                                #jsonMemberOfPredicate
     ;
 
+subQueryPredicate
+    : selectStatement
+    ;
+
 isKeyword
     : IS
     ;
 
 expressionDelimiter //SPEAKQL FEATURE: delimiter between partitioned simple queries
-    : AND_THEN | THEN
+    : AND_THEN | THEN | NEXT
     ;
 
 selectModifierExpression //SPEAKQL FEATURE: enables reordering by adding an additional selectModifierItem layer
@@ -267,7 +272,7 @@ queryExpression
 
 
 fromClauseNoJoin //SPEAKQL FEATURE: This is the from clause used by the simple query partition. If a query has a query expression delimiter, then this rule is used.
-    : fromKeyword tableSourceNoJoin
+    : fromKeyword theKeyword? tableSourceNoJoin tableKeyword?
     ;
 
 fromClause
@@ -297,15 +302,15 @@ tableSource
     ;
 
 tableSourceItem
-    : subQueryTable tableAlias                                                  #subqueryTableItem
-    | theKeyword? tableName tableKeyword?                                       #onlyTableNameItem
+    : leftParen subQueryTable rightParen tableAlias                             #subqueryTableItem
+    | theKeyword? tableName tableKeyword? tableAlias?                           #onlyTableNameItem
     | tableName (PARTITION leftParen uidList rightParen )?
         (tableAlias)? (indexHint (',' indexHint)* )?                            #atomTableItem
     | leftParen tableSources rightParen                                         #tableSourcesItem
     ;
 
 subQueryTable
-    : leftParen parenthesisSubquery=selectStatement rightParen
+    : parenthesisSubquery=selectStatement
     ;
 
 tableAlias
@@ -472,8 +477,10 @@ functionArgs
     ;
 
 
+//SpeakQl feature: (line 2) enables stating a function without parentheses for column names or constants
+// but is not allowed for expressions or additional functionCalls
 aggregateWindowedFunction
-    : theKeyword? (AVG | MAX | MIN | SUM) ofKeyword? leftParen aggregator=(ALL | DISTINCT)? functionArg rightParen
+    : theKeyword? (AVG | AVERAGE | MAX | MIN | SUM) ofKeyword? leftParen aggregator=(ALL | DISTINCT)? functionArg rightParen
     | theKeyword? COUNT ofKeyword? leftParen (starArg='*' | allAggregatorKeyword? functionArg
         | distinctAggregatorKeyword functionArgs) rightParen
     | ( BIT_AND | BIT_OR | BIT_XOR | STD | STDDEV | STDDEV_POP | STDDEV_SAMP | VAR_POP | VAR_SAMP | VARIANCE )
@@ -481,6 +488,12 @@ aggregateWindowedFunction
     | GROUP_CONCAT leftParen aggregator=DISTINCT? functionArgs
         (ORDER BY orderByExpression (',' orderByExpression)* )? (SEPARATOR separator=STRING_LITERAL)? rightParen
     ;
+
+noParenAggregateWindowedFunction
+    : theKeyword? (AVG | AVERAGE | MAX | MIN | SUM) ofKeyword? aggregator=(ALL | DISTINCT)? (constant | fullColumnName)
+    | theKeyword? COUNT ofKeyword? leftParen (starArg='*' | allAggregatorKeyword? (constant | fullColumnName)
+              | distinctAggregatorKeyword functionArgs) rightParen
+;
 
 //SpeakQl feature / syntactic sugar: OF and THE keywords to make speaking aggregate functions more natural
 ofKeyword
