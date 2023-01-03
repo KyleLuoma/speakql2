@@ -21,17 +21,17 @@ querySpecification
 
 
 queryOrderSpecification //SPEAKQL FEATURE: Alternate expression ordering
-    : selectExpression (whereKeyword whereExpression)? tableExpression
-    | selectExpression tableExpression (whereKeyword whereExpression)?
-    | tableExpression selectExpression (whereKeyword whereExpression)?
-    | tableExpression (whereKeyword whereExpression)? selectExpression
+    : selectExpression whereExpression? tableExpression
+    | selectExpression tableExpression whereExpression?
+    | tableExpression selectExpression whereExpression?
+    | tableExpression whereExpression? selectExpression
     ;
 
 multiQueryOrderSpecification
-    : selectExpression (whereKeyword whereExpression)? tableExpressionNoJoin
-    | selectExpression tableExpressionNoJoin (whereKeyword whereExpression)?
-    | tableExpressionNoJoin selectExpression (whereKeyword whereExpression)?
-    | tableExpressionNoJoin (whereKeyword whereExpression)? selectExpression
+    : selectExpression whereExpression? tableExpressionNoJoin
+    | selectExpression tableExpressionNoJoin whereExpression?
+    | tableExpressionNoJoin selectExpression whereExpression?
+    | tableExpressionNoJoin whereExpression? selectExpression
     ;
 
 
@@ -47,7 +47,8 @@ selectClause
     ;
 
 selectKeyword //SPEAKQL FEATURE: SELECT keyword synonyms
-    : SELECT | RETRIEVE | SHOW_ME | DISPLAY | PRESENT | FIND | GET | WHAT_IS | WHAT_ARE | WHAT_IS_THE | WHAT_ARE_THE
+    : SELECT | RETRIEVE | SHOW_ME | DISPLAY | PRESENT | FIND | GET
+    | WHAT_IS | WHAT_ARE | WHAT_IS_THE | WHAT_ARE_THE
     ;
 
 nothingElement
@@ -201,10 +202,9 @@ expressionDelimiter //SPEAKQL FEATURE: delimiter between partitioned simple quer
     : AND_THEN | THEN | NEXT
     ;
 
-selectModifierExpression //SPEAKQL FEATURE: enables reordering by adding an additional selectModifierItem layer
-                         //                 with every modifier item as an option
+selectModifierExpression //SPEAKQL FEATURE: enables reordering by adding an additional
+                         // selectModifierItem layer with every modifier item as an option
     : selectModifierItem? selectModifierItem? selectModifierItem? selectModifierItem?
-    //| groupByClause? havingClause? windowClause? orderByClause? limitClause? selectIntoExpression?
     ;
 
 selectModifierItem
@@ -301,7 +301,8 @@ tableKeyword
     ;
 
 tableSources
-    : theKeyword? tableSource tableKeyword? (tableSourceDelimiter theKeyword? tableSource tableKeyword?)*
+    : theKeyword? tableSource tableKeyword?
+        (tableSourceDelimiter theKeyword? tableSource tableKeyword?)*
     ;
 
 tableSourceNoJoin //SPEAKQL FEATURE: Used in queries with an expressionDelimiter
@@ -314,6 +315,7 @@ tableSource
     | leftParen tableSourceItem joinPart* rightParen                            #tableSourceNested
     ;
 
+//SpeakQL Feature: Must wrap subqueries in parens
 tableSourceItem
     : leftParen subQueryTable rightParen tableAlias                             #subqueryTableItem
     | theKeyword? tableName tableKeyword? tableAlias?                           #onlyTableNameItem
@@ -378,7 +380,7 @@ multiNaturalJoin
     ;
 
 withKeyword //SPEAKQL FEATURE: WITH keyword associates two tables in a multi-join statement
-    : WITH | WITH_TABLE
+    : WITH | WITH_TABLE | AND
     ;
 
 joinPart
@@ -443,7 +445,16 @@ expressionAtom
     | ROW leftParen expression (',' expression)+ rightParen                         #nestedRowExpressionAtom
     | EXISTS leftParen selectStatement rightParen                                   #existsExpressionAtom
     | leftParen selectStatement rightParen                                          #subqueryExpressionAtom
+    | INTERVAL expression intervalType                              #intervalExpressionAtom
     | left=expressionAtom mathOperator right=expressionAtom                         #mathExpressionAtom
+    ;
+
+intervalType
+    : intervalTypeBase
+    | YEAR | YEAR_MONTH | DAY_HOUR | DAY_MINUTE
+    | DAY_SECOND | HOUR_MINUTE | HOUR_SECOND | MINUTE_SECOND
+    | SECOND_MICROSECOND | MINUTE_MICROSECOND
+    | HOUR_MICROSECOND | DAY_MICROSECOND
     ;
 
 constant
@@ -490,8 +501,7 @@ functionArgs
     ;
 
 
-//SpeakQl feature: (line 2) enables stating a function without parentheses for column names or constants
-// but is not allowed for expressions or additional functionCalls
+
 aggregateWindowedFunction
     : theKeyword? (AVG | AVERAGE | MAX | MIN | SUM) ofKeyword? leftParen aggregator=(ALL | DISTINCT)? functionArg rightParen
     | theKeyword? COUNT ofKeyword? leftParen (starArg='*' | allAggregatorKeyword? functionArg
@@ -502,11 +512,28 @@ aggregateWindowedFunction
         (ORDER BY orderByExpression (',' orderByExpression)* )? (SEPARATOR separator=STRING_LITERAL)? rightParen
     ;
 
+//SpeakQl feature: enables stating a function without parentheses for column names or constants
+// but is not allowed for expressions or additional functionCalls
 noParenAggregateWindowedFunction
-    : theKeyword? (AVG | AVERAGE | MAX | MIN | SUM) ofKeyword? aggregator=(ALL | DISTINCT)? (constant | fullColumnName)
-    | theKeyword? COUNT ofKeyword? leftParen (starArg='*' | allAggregatorKeyword? (constant | fullColumnName)
-              | distinctAggregatorKeyword functionArgs) rightParen
+    : theKeyword? aggregatedWindowedFunctionKeywords ofKeyword? naturalFunctionArgs
+    | theKeyword? countKeyword ofKeyword? naturalCountFunctionArgs
 ;
+
+aggregatedWindowedFunctionKeywords
+    : AVG | AVERAGE | MAX | MIN | SUM
+    ;
+
+countKeyword
+    : COUNT
+    ;
+
+naturalFunctionArgs
+    : aggregator=(ALL | DISTINCT)? (constant | fullColumnName)
+    ;
+
+naturalCountFunctionArgs
+    : (starArg='*' | allAggregatorKeyword? (constant | fullColumnName) | distinctAggregatorKeyword functionArgs)
+    ;
 
 //SpeakQl feature / syntactic sugar: OF and THE keywords to make speaking aggregate functions more natural
 ofKeyword
@@ -556,7 +583,8 @@ whereKeyword
     : WHERE ;
 
 whereExpression
-    : whereExpr=expression
+    : whereKeyword whereExpr=expression
+    | whereKeyword expression
     ;
 
 tableExpressionNoJoin

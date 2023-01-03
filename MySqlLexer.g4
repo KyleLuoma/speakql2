@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-lexer grammar SpeakQlLexer;
+lexer grammar MySqlLexer;
 
 channels { MYSQLCOMMENT, ERRORCHANNEL }
 
@@ -37,67 +37,8 @@ LINE_COMMENT:                        (
                                        | '--' ('\r'? '\n' | EOF)
                                      ) -> channel(HIDDEN);
 
+
 // Keywords
-
-// SpeakQL 2 Keywords
-END_OF_FILE:                        '<EOF>';
-
-RETRIEVE:                           'RETRIEVE';
-SHOW_ME:                            'SHOW ME';
-DISPLAY:                            'DISPLAY';
-PRESENT:                            'PRESENT';
-FIND:                               'FIND';
-WHAT_IS:                            'WHAT IS';
-WHAT_ARE:                           'WHAT ARE';
-WHAT_IS_THE:                        'WHAT IS THE';
-WHAT_ARE_THE:                       'WHAT ARE THE';
-
-IN_TABLE:                           'IN TABLE';
-IN_TABLES:                          'IN TABLES';
-FROM_TABLE:                         'FROM TABLE';
-FROM_TABLES:                        'FROM TABLES';
-
-JOIN_TABLE:                         'JOIN TABLE';
-BY_JOINING:                         'BY JOINING';
-BY_JOINING_TABLE:                   'BY JOINING TABLE';
-JOIN_WITH:                          'JOIN WITH';
-JOIN_WITH_TABLE:                    'JOIN WITH TABLE';
-JOINED_WITH:                        'JOINED WITH';
-JOINED_WITH_TABLE:                  'JOINED WITH TABLE';
-BY_JOINING_WITH_TABLE:              'BY JOINING WITH TABLE';
-
-WITH_TABLE:                         'WITH TABLE';
-
-SPOKEN_DOT:                         'DOT';
-
-AND_THEN:                           'AND THEN';
-NEXT:                               'NEXT';
-AVERAGE:                            'AVERAGE';
-
-SUBQUERY:                           'SUBQUERY';
-
-SCHRODINGER:                        '__SCHROD';
-
-AUTOMATIC:                          'AUTOMATIC';
-AUTOMATICALLY:                      'AUTOMATICALLY';
-
-NOTHING:                            'NOTHING';
-NO_COLUMNS:                         'NO COLUMNS';
-
-OPEN_PARENTHESIS:                   'OPEN PARENTHESIS';
-LEFT_PARENTHESIS:                   'LEFT PARENTHESIS';
-CLOSE_PARENTHESIS:                  'CLOSE PARENTHESIS';
-RIGHT_PARENTHESIS:                  'RIGHT PARENTHESIS';
-OPEN_PAREN:                         'OPEN PAREN';
-LEFT_PAREN:                         'LEFT PAREN';
-CLOSE_PAREN:                        'CLOSE PAREN';
-RIGHT_PAREN:                        'RIGHT PAREN';
-
-THE:                                'THE';
-
-ASCENDING:                          'ASCENDING';
-DESCENDING:                         'DESCENDING';
-
 // Common Keywords
 
 ADD:                                 'ADD';
